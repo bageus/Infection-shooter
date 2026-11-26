@@ -38,6 +38,7 @@ const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_directo
 @onready var planning_root: Node3D = $PlanningObjects
 @onready var gameplay: Node3D = $Gameplay
 @onready var mutation_choice: Control = $MutationChoice
+@onready var prototype_hud: Node = $PrototypeHUD
 @onready var infection_runtime: Node = $Gameplay/Player/InfectionRuntime
 
 var world_bindings: RefCounted
@@ -229,6 +230,10 @@ func set_floor_hints_enabled(enabled: bool) -> void:
 	if is_instance_valid(mission_layout):
 		mission_layout.call("set_floor_hints_enabled", enabled)
 
+
+func set_perf_counters_enabled(show_fps: bool, show_enemies: bool) -> void:
+	if is_instance_valid(prototype_hud):
+		prototype_hud.call("set_perf_counters_visible", show_fps, show_enemies)
 
 ## Settings: a small health bar above each live enemy.
 func set_enemy_health_bars_enabled(enabled: bool) -> void:

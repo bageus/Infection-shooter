@@ -284,6 +284,12 @@ func _process(delta: float) -> void:
 		enemy_count_label.text = tr("hudEnemies") % get_tree().get_nodes_in_group("infected_alive").size()
 
 
+## Settings: the FPS and enemy counters in the corner, each on or off.
+func set_perf_counters_visible(show_fps: bool, show_enemies: bool) -> void:
+	fps_label.visible = show_fps
+	enemy_count_label.visible = show_enemies
+
+
 func _configure_icon_regions() -> void:
 	var texture := weapon_icon.texture
 	if texture == null:

@@ -154,7 +154,7 @@ func _exercise_gore_palette(planner: Node) -> void:
 	_check(str(blood.call("get_blood_config")["texture"]) == str(entry["blood_texture"]), "Blood keeps the chosen texture")
 	controls.call("_show_gore_catalog")
 	var gore: Array = catalog.get("active_catalog")
-	_check(gore.size() == 85, "Gore palette lists current corpses and body parts (%d)" % gore.size())
+	_check(gore.size() == 88, "Gore palette lists current corpses, body parts and the three hero poses (%d)" % gore.size())
 	_check(not (controls.get("blood_options") as Control).visible, "Blood options hide outside the Blood palette")
 	for index in [0, 1, gore.size() - 1]:
 		var decor_entry: Dictionary = gore[index]

@@ -257,6 +257,7 @@ func _set_open(value: bool) -> void:
 		get_tree().paused = true
 	else:
 		get_tree().paused = _previous_pause
+		Input.action_release("sprint") # a key released while the menu had focus can leave sprint stuck on
 	window.visible = value
 	_play_ui_sound(&"mutation_open" if value else &"mutation_close")
 	card.dismiss()

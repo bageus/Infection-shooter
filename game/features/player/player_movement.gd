@@ -497,12 +497,13 @@ func _update_move(delta:float)->void:
 	var recoil_motion := _shot_recoil.step(delta)
 	if not recoil_motion.is_zero_approx():
 		move_and_collide(recoil_motion)
-	if is_wounded() and _blood_motion_start.distance_to(global_position) >= blood_drop_distance:
+	var trailing := is_wounded() and health < max_health * 0.5 # walking trail only below half health
+	if trailing and _blood_motion_start.distance_to(global_position) >= blood_drop_distance:
 		if _blood_motion_start.distance_to(global_position) < 3.0:
 			var excluded: Array[RID] = [get_rid()]
 			wounded_moved.emit(_blood_motion_start, global_position, excluded)
 		_blood_motion_start = global_position
-	elif not is_wounded():
+	elif not trailing:
 		_blood_motion_start = global_position
 	_push_chair_contacts()
 	if _roll_remaining>0.0: _push_roll_contacts()

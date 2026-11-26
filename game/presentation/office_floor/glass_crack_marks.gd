@@ -4,7 +4,7 @@ const ATLAS := preload("res://game/core/vfx/public/surface_atlases.gd")
 
 
 # permanent: kept outside the impact pool's mark budget, so it is never evicted or freed when hidden.
-static func spawn(pane: StaticBody3D, point: Vector3, normal: Vector3, max_size: float = 0.65, permanent: bool = false) -> MeshInstance3D:
+static func spawn(pane: PhysicsBody3D, point: Vector3, normal: Vector3, max_size: float = 0.65, permanent: bool = false) -> MeshInstance3D:
 	var floor_view := pane.get("_debris_floor") as Node3D
 	if is_instance_valid(floor_view):
 		floor_view.call("bake_glass_hit", pane, point, normal)
