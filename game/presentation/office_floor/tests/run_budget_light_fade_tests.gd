@@ -13,6 +13,8 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_fade(OMNI.new() as OmniLight3D, "Desk light")
 	_test_fade(SPOT.new() as SpotLight3D, "Floodlight")
+	_test_shadow_grant(OMNI.new() as OmniLight3D, "Desk light")
+	_test_shadow_grant(SPOT.new() as SpotLight3D, "Floodlight")
 	print("Budget light fade tests: %d failure(s)." % _failures)
 	quit(0 if _failures == 0 else 1)
 
@@ -33,6 +35,22 @@ func _test_fade(light: Light3D, label: String) -> void:
 	_check(light.light_energy > 0.0 and light.light_energy < 1.0, "%s fade-out is gradual" % label)
 	light.call("_process", 1.0)
 	_check(not light.visible and is_zero_approx(light.light_energy), "%s ends dark after fade-out" % label)
+	light.free()
+
+
+## A lamp casts a shadow only when the budget grants it, and only once it is fully lit.
+func _test_shadow_grant(light: Light3D, label: String) -> void:
+	light.set("_full_energy", 1.0)
+	light.set_process(false)
+	root.add_child(light)
+	light.call("set_local_lighting_enabled", true)
+	light.call("set_budget_lit", true, true)
+	light.call("_process", 0.1)
+	_check(not light.shadow_enabled, "%s casts no shadow while fading in" % label)
+	light.call("_process", 1.0)
+	_check(light.shadow_enabled, "%s casts a shadow once lit with shadows granted" % label)
+	light.call("set_budget_lit", true, false)
+	_check(not light.shadow_enabled, "%s drops its shadow at once when the grant is taken" % label)
 	light.free()
 
 

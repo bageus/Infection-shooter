@@ -1,6 +1,6 @@
 extends SpotLight3D
 ## Directional light of a prop (floodlight, operating lamp). It joins the lamp budget
-## like budget_omni_light.gd and never casts a shadow.
+## like budget_omni_light.gd and casts a shadow only when the lamp budget grants it.
 
 const BUDGET_FADE_SECONDS := 0.25
 
@@ -9,6 +9,7 @@ var _local_enabled := false
 var _budget_lit := true
 var _full_energy := 0.0
 var _fade := 0.0
+var _budget_shadow := false
 
 
 static func create(color: Color, energy: float, light_range: float, angle: float, aim: Transform3D) -> SpotLight3D:
@@ -35,6 +36,7 @@ func _process(delta: float) -> void:
 	_fade = move_toward(_fade, _target(), delta / BUDGET_FADE_SECONDS)
 	light_energy = _full_energy * _fade
 	visible = _fade > 0.0
+	_sync_shadow()
 	set_process(_fade != _target())
 
 
@@ -65,8 +67,9 @@ func get_light_radius() -> float:
 	return spot_range
 
 
-func set_budget_lit(lit: bool, _shadow: bool) -> void:
+func set_budget_lit(lit: bool, shadow: bool) -> void:
 	_budget_lit = lit
+	_budget_shadow = shadow
 	_apply()
 
 
@@ -80,4 +83,12 @@ func _apply() -> void:
 		_fade = 0.0
 		light_energy = 0.0
 		visible = false
+	_sync_shadow()
 	set_process(_fade != _target() or _fade > 0.0)
+
+
+## Shadows follow the budget's grant, and only once the light is fully faded in (no popped shadow).
+func _sync_shadow() -> void:
+	shadow_enabled = _budget_shadow and _fade >= 1.0
+	# Same caster rule as planner lights: walls only, unless the high shadow setting asks for every object.
+	shadow_caster_mask = 0xFFFFF if is_inside_tree() and get_tree().get_meta(&"lamp_all_casters", false) else (1 << 19)
