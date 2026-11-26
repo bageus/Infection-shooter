@@ -304,7 +304,7 @@ func _begin_death() -> void:
 
 func _open_pause_menu() -> void:
 	_pause_open = true
-	pause_menu.call("show_screen", "pause")
+	pause_menu.call("show_screen", "pause", "", has_node("LevelEntries") and $LevelEntries.chain.is_checkpoint($LevelEntries.chain.index_of(current_level)))
 	pause_menu.move_to_front()
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
