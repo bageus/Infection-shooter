@@ -4,7 +4,6 @@ extends Node3D
 ## is awake, so resting props cost nothing.
 
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
-const IMPACT_MATERIAL := preload("res://game/presentation/office_floor/environment_impact_material.gd")
 const MIN_SPEED_LOSS := 1.4
 const MATERIAL_EVENTS := {
 	"wood": &"fall_wood", "metal": &"fall_metal", "light": &"fall_light", "tech": &"fall_tech",
@@ -30,7 +29,6 @@ static func watch(body: RigidBody3D, volume_offset_db := 0.0, fixed_event: Strin
 		# A cabinet's bullet cost is metal, but it knocks and lands like wood.
 		if body.has_method("get_impact_sound_material") and str(body.call("get_impact_sound_material", -1)) == "wood":
 			material = "wood"
-		material = IMPACT_MATERIAL.knock(str(body.get("model_path")), material)
 		watcher.event = MATERIAL_EVENTS.get(material, &"fall_wood")
 	body.add_child(watcher)
 

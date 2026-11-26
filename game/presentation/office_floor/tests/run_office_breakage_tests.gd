@@ -60,7 +60,7 @@ func _test_cardboard(stage: Node3D) -> void:
 
 ## Shots that break a broken 04 crate: a pistol never does, the others need the listed number of hits.
 func _test_broken_crate_shots(stage: Node3D) -> void:
-	var cases := [["PISTOL", 19.0, 0], ["UZI", 38.0, 3], ["AK", 65.0, 2], ["M4", 58.0, 2], ["MINIGUN", 70.0, 1], ["SNIPER RIFLE", 110.0, 1], ["SHOTGUN", 32.0, 3]]
+	var cases := [["PISTOL", 19.0, 0], ["UZI", 15.0, 3], ["AK", 28.0, 3], ["M4", 23.0, 4], ["MINIGUN", 20.0, 4], ["SNIPER RIFLE", 105.0, 1], ["SHOTGUN", 32.0, 3]]
 	for model in [MODELS + "04/04_crate_small_broken.glb", MODELS + "04/04_crate_large_broken.glb"]:
 		for case in cases:
 			var needed: int = case[2]
@@ -217,7 +217,7 @@ func _test_partition_logo(stage: Node3D) -> void:
 func _test_partition_sound() -> void:
 	var partition := PROP_SCENE.instantiate() as RigidBody3D
 	partition.set("model_path", PARTITION)
-	_expect(partition.call("get_projectile_material", -1) == "concrete", "Wood slat partitions keep their bullet cost as concrete.")
+	_expect(partition.call("get_projectile_material", -1) == "wood", "Wood slat partitions cost bullets as wood (spec 26.11.2026).")
 	_expect(partition.call("get_impact_sound_material", -1) == "wood", "Wood slat partitions ring like wood on impact.")
 	partition.free()
 	for model in ["03/03_bookshelf.glb", "03/03_book_case_small.glb", "03/03_book_case_with_back.glb", "03/03_file_cabinet_largest.glb", "03/03_file_cabinet_smaller.glb", "03/03_file_cabinet_small_shelf_fancy.glb", "03/03_file_cabinet_large_shelf_fancy.glb"]:

@@ -24,7 +24,7 @@ func _categories_and_balance() -> void:
 	cabinet.hit(20.0, "SHOTGUN", false, false, false, false)
 	_check(is_equal_approx(cabinet.health, 140.0), "Shotgun object multiplier remains 0.75")
 	cabinet.hit(20.0, "UZI", false, false, false, false)
-	_check(is_equal_approx(cabinet.health, 122.0), "Uzi object multiplier remains 0.9")
+	_check(is_equal_approx(cabinet.health, 140.0 - 20.0 * 28.0 / 15.0), "Uzi hits props as hard as AK rounds (28 vs 15)")
 
 
 func _variant_progression() -> void:
@@ -59,8 +59,8 @@ func _special_objects() -> void:
 	_check(stack.hit(60.0, "SHOTGUN", true, false, false, false) == STATE.HitAction.SCATTER and stack.broken, "Book stacks scatter at their existing small-object threshold")
 	var mount := STATE.new()
 	mount.configure("13_panel.glb", 0, false)
-	_check(mount.hit(100.0, "UZI", false, true, true, false) == STATE.HitAction.NONE and not mount.broken, "Wall mount stays anchored below its damage threshold")
-	_check(mount.hit(100.0, "UZI", false, true, true, false) == STATE.HitAction.DETACH and mount.broken, "Wall mount detaches at its original damage threshold")
+	_check(mount.hit(100.0, "AK", false, true, true, false) == STATE.HitAction.NONE and not mount.broken, "Wall mount stays anchored below its damage threshold")
+	_check(mount.hit(100.0, "AK", false, true, true, false) == STATE.HitAction.DETACH and mount.broken, "Wall mount detaches at its original damage threshold")
 	var effects := STATE.new()
 	_check(effects.short_circuit() and not effects.short_circuit(), "First electronic hit short-circuits exactly once")
 	_check(effects.trigger_extinguisher() and not effects.trigger_extinguisher(), "Extinguisher triggers exactly once")
