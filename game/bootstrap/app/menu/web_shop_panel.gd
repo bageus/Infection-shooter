@@ -5,6 +5,7 @@ extends PanelContainer
 const SHOP := preload("res://game/bootstrap/app/web_shop.gd")
 const WALLET := preload("res://game/bootstrap/app/web_wallet.gd")
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
+const ICONS := preload("res://game/bootstrap/app/menu/web_shop_icons.gd")
 const AMMO_ORDER: Array[String] = ["pistol", "uzi", "shotgun", "rifle", "sniper", "minigun"]
 const SUPPLY_ORDER: Array[String] = ["health", "antidote", "armor", "dna"]
 const WEAPON_ORDER: Array[String] = ["uzi", "shotgun", "m16", "ak", "sniper", "minigun"]
@@ -81,23 +82,18 @@ func _loadout(profile: Dictionary) -> Control:
 	var row := _grid(7)
 	var ready: Array = ["pistol"] + profile["owned"] + profile["rented"]
 	for index in 7:
-		var slot := Label.new()
-		slot.custom_minimum_size = Vector2(70, 44)
-		slot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		slot.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		slot.add_theme_font_size_override("font_size", 11)
-		if index < ready.size():
-			slot.text = menu.text("shopItem_" + ready[index])
-		else:
-			slot.modulate = Color(1, 1, 1, 0.3)
-			slot.text = "—"
+		var slot := ICONS.icon(ready[index] if index < ready.size() else "", Vector2(70, 44))
+		if index >= ready.size():
+			slot.modulate = Color(1, 1, 1, 0.0)
 		row.add_child(slot)
 	return row
 
 
-func _card(title: String, detail: String) -> VBoxContainer:
+func _card(title: String, detail: String, icon_id := "") -> VBoxContainer:
 	var card := VBoxContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if ICONS.texture(icon_id) != null:
+		card.add_child(ICONS.icon(icon_id, Vector2(0, 48)))
 	card.add_child(STYLE.label(title, 13, true))
 	if not detail.is_empty():
 		var info := STYLE.label(detail, 11)
@@ -108,21 +104,21 @@ func _card(title: String, detail: String) -> VBoxContainer:
 
 func _ammo_card(profile: Dictionary, pack: String) -> Control:
 	var offer: Dictionary = SHOP.AMMO[pack]
-	var card := _card(menu.text("shopItem_" + pack), "+%d  (%d)" % [offer["amount"], profile["ammo"].get(pack, 0)])
+	var card := _card(menu.text("shopItem_" + pack), "+%d  (%d)" % [offer["amount"], profile["ammo"].get(pack, 0)], "ammo_" + pack)
 	_offer_buttons(card, int(offer["price"]), bool(offer["ad"]), SHOP.buy_ammo.bind(profile, pack), SHOP.claim_ammo_ad.bind(profile, pack))
 	return card
 
 
 func _supply_card(profile: Dictionary, id: String) -> Control:
 	var offer: Dictionary = SHOP.SUPPLIES[id]
-	var card := _card(menu.text("shopItem_" + id), "%s  (%d/%d)" % [menu.text("shopDesc_" + id), profile["supplies"].get(id, 0), SHOP.SUPPLY_CAP])
+	var card := _card(menu.text("shopItem_" + id), "%s  (%d/%d)" % [menu.text("shopDesc_" + id), profile["supplies"].get(id, 0), SHOP.SUPPLY_CAP], id)
 	_offer_buttons(card, int(offer["price"]), bool(offer["ad"]), SHOP.buy_supply.bind(profile, id), SHOP.claim_supply_ad.bind(profile, id))
 	return card
 
 
 func _weapon_card(profile: Dictionary, id: String) -> Control:
 	var offer: Dictionary = SHOP.WEAPONS[id]
-	var card := _card(menu.text("shopItem_" + id), "")
+	var card := _card(menu.text("shopItem_" + id), "", id)
 	if id in profile["owned"]:
 		card.add_child(STYLE.label("✓ " + menu.text("shopOwned"), 12))
 		return card
