@@ -1,15 +1,9 @@
 extends RefCounted
-## An enemy spawned from a hole starts its Climb clip under the floor (ADR-0071). While it climbs it
-## has no collision and is moved by hand: the origin rises from its spawn depth to the standing height
-## over the clip's second part, so the body comes out of the floor as the clip plays. No gravity.
+## An enemy spawned from a hole plays its Climb clip standing at its normal height (ADR-0071): the clip
+## itself starts with the body under the floor and ends standing, so the floor hides what is still below
+## it and the enemy really climbs out. While it climbs it has no collision, no gravity and does not move.
 
 const CLIP := &"Climb"
-const RISE_FROM := 0.35 # clip progress where the origin starts to rise
-
-
-## Origin height for a spawned enemy: a whole capsule below the floor, so the body starts hidden.
-static func under_floor(actor: Node) -> float:
-	return -_capsule_height(actor)
 
 
 ## Starts the climb of a spawned enemy; returns its length, 0.0 when it has no Climb clip or was placed.
@@ -20,34 +14,20 @@ static func begin(actor: Node, animation: Node) -> float:
 	var length := float(animation.call("play_named_one_shot", CLIP, 0.0, randf_range(0.92, 1.08)))
 	if length <= 0.0:
 		return 0.0
+	# Without this the rest pose (a standing body) shows for the first frames, before the clip is evaluated.
+	(animation.get("animation_player") as AnimationPlayer).advance(0.0)
 	var body := actor as CollisionObject3D
-	body.global_position.y += under_floor(actor) # placed at floor level by the spawner
+	body.global_position.y += _capsule_height(actor) * 0.5 + 0.02 # the spawner places it at floor level
 	actor.set_meta(&"emerge_mask", body.collision_mask)
-	actor.set_meta(&"emerge_from", body.global_position.y)
-	actor.set_meta(&"emerge_length", length)
-	var visual := actor.get("body_visual") as Node3D
-	actor.set_meta(&"emerge_visual_y", visual.position.y if visual != null else 0.0)
-	body.collision_mask = 0 # the floor would push the body up while it starts below it
+	body.collision_mask = 0 # the floor would push the body while the clip still has it below the surface
 	return length
 
 
 ## One physics tick of the climb: returns the time left, 0.0 once the climb is over and the enemy is back on gravity.
 static func step(actor: CharacterBody3D, left: float, delta: float) -> float:
 	actor.velocity = Vector3.ZERO
-	var length: float = actor.get_meta(&"emerge_length")
-	var progress := 1.0 - left / length
-	var rise := smoothstep(RISE_FROM, 1.0, progress)
-	var from: float = actor.get_meta(&"emerge_from")
-	var y := lerpf(from, _capsule_height(actor) * 0.5 + 0.02, rise)
-	actor.global_position.y = y
-	# The mesh lags the capsule's lift, so the clip's own climb shows instead of the whole body riding up.
-	var visual := actor.get("body_visual") as Node3D
-	if visual != null:
-		visual.position.y = float(actor.get_meta(&"emerge_visual_y")) + (from - y) * (1.0 - rise)
 	if left - delta > 0.0:
 		return left - delta
-	if visual != null:
-		visual.position.y = float(actor.get_meta(&"emerge_visual_y"))
 	actor.collision_mask = actor.get_meta(&"emerge_mask")
 	return 0.0
 

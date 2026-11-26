@@ -311,7 +311,9 @@ func _test_climb_out(name: String) -> void:
 	enemy.call("set_target", target)
 	var player := _player_of(enemy)
 	_expect(player.current_animation == "Climb", name + " starts with the Climb clip (%s)." % player.current_animation)
-	_expect(enemy.global_position.y < -1.0, name + " starts under the floor (%.2f)." % enemy.global_position.y)
+	_expect(enemy.global_position.y > 0.5, name + " climbs at its normal height; the clip itself starts below the floor (%.2f)." % enemy.global_position.y)
+	_expect(is_zero_approx(preload("res://game/features/character_animation/public/enemy_blends.gd").seconds("Climb", 0.0)), name + " does not fade into Climb from the standing pose.")
+	_expect(float(enemy.get("_emerge_left")) > 0.0, name + " reports it is climbing, so no health bar shows yet.")
 	_expect(enemy.collision_mask == 0, name + " has no floor collision while it climbs.")
 	var start := enemy.global_position
 	for index in 20:

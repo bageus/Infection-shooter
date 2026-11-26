@@ -10,6 +10,8 @@ const LOCOMOTION := ["Walk", "Run", "Sprint", "Crawl", "FoursRun"]
 
 ## Seconds to cross-fade into `clip`; `after_one_shot` when a one-shot clip just ended.
 static func seconds(clip: String, default: float, after_one_shot: bool = false) -> float:
+	if clip == "Climb": # it starts under the floor: a fade from the standing pose would show the body sinking first
+		return 0.0
 	var blend := default
 	if clip.begins_with("Idle"):
 		blend = 0.3
