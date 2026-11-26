@@ -8,6 +8,7 @@ const PREFERENCES := preload("res://game/bootstrap/app/menu/menu_preferences.gd"
 const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
 const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
 const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
+const WEB_SHOP := preload("res://game/bootstrap/app/menu/web_shop_panel.gd")
 const DIALOG := preload("res://game/bootstrap/app/menu/menu_dialog.gd")
 const BACKGROUNDS := {
 	"main": preload("res://assets/interface/backgrounds/main.png"),
@@ -30,6 +31,9 @@ var reason_key := ""
 var checkpoint_mission := false
 ## Store page offered on the defeat and victory screens; empty on platforms without the promo.
 var steam_url := ""
+## Web arena shop beside the main menu buttons; only on a platform with the endless mode.
+var shop_enabled := false
+var shop: Control
 var _click_player: AudioStreamPlayer
 var _music: AudioStreamPlayer
 
@@ -42,6 +46,7 @@ func _ready() -> void:
 	var campaign := CAMPAIGN.new()
 	campaign.load_file()
 	steam_url = campaign.steam_promo_url(PLATFORM.detect_id())
+	shop_enabled = campaign.mode(PLATFORM.detect_id()) == "endless"
 	preferences.load_settings()
 	# The game scene (and its environment) may not be current yet; apply once
 	# the tree has settled so saved volume and brightness hold from the start.
@@ -108,6 +113,14 @@ func refresh() -> void:
 		child.queue_free()
 	buttons.clear()
 	_build_content()
+	if is_instance_valid(shop):
+		remove_child(shop)
+		shop.queue_free()
+	shop = null
+	if shop_enabled and screen_kind == "main":
+		shop = WEB_SHOP.new()
+		add_child(shop)
+		shop.setup(self)
 	footer.text = "━━   " + text("lastSignal").to_upper()
 	footer.visible = screen_kind == "failed"
 	keyboard.text = "v." + str(ProjectSettings.get_setting("application/config/version", "0.00.000"))
@@ -295,6 +308,10 @@ func _layout() -> void:
 		return
 	content_scroll.position = Vector2(size.x * 0.06, size.y * 0.10)
 	content_scroll.size = Vector2(minf(400, size.x * 0.43), size.y * 0.80)
+	if is_instance_valid(shop):
+		var left := content_scroll.position.x + content_scroll.size.x + 24.0
+		shop.position = Vector2(left, size.y * 0.05)
+		shop.size = Vector2(maxf(size.x - left - size.x * 0.02, 320.0), size.y * 0.90)
 	footer.position = Vector2(size.x * 0.06, size.y * 0.94)
 	keyboard.position = Vector2(size.x - keyboard.get_minimum_size().x - size.x * 0.04, size.y * 0.94)
 	keyboard.visible = size.x >= 1000
