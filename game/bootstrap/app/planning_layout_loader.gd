@@ -2,6 +2,7 @@ extends RefCounted
 ## Prepare a complete map before replacing it; optionally commit between frames.
 const SURFACE_SETTINGS := preload("res://game/bootstrap/app/planning_surface_decals.gd")
 const QUESTS := preload("res://game/bootstrap/app/quest/quest_store.gd")
+const MAP_MODE := preload("res://game/bootstrap/app/planning_map_mode.gd")
 const LAMP_VISIBILITY := preload("res://game/bootstrap/app/planning_lamp_visibility.gd")
 const FLOOR_SIZE := preload("res://game/bootstrap/app/planning_floor_size.gd")
 const HERO_SPAWN := preload("res://game/bootstrap/app/planning_hero_spawn.gd")
@@ -185,6 +186,7 @@ func _check_plan(data: Dictionary, prepared: Dictionary) -> Dictionary:
 	prepared["floor_size_v1"] = data.get("floor_size_v1", [])
 	prepared["floor_type_v1"] = data.get("floor_type_v1", "")
 	prepared["floor_areas_v1"] = data.get("floor_areas_v1", [])
+	prepared[MAP_MODE.KEY] = data.get(MAP_MODE.KEY, "")
 	prepared[LAMP_VISIBILITY.KEY] = data.get(LAMP_VISIBILITY.KEY, false)
 	QUESTS.stage(data, prepared)
 	var cache: Dictionary = data.get("floor_biomass_v1", {})
@@ -214,6 +216,7 @@ func _begin(prepared: Dictionary) -> void:
 	preload("res://game/bootstrap/app/planning_floor_type.gd").restore(session, prepared.get("floor_type_v1", ""))
 	preload("res://game/bootstrap/app/planning_floor_type.gd").restore_tile(session, prepared.get("floor_tile_step_v1", 2.0))
 	preload("res://game/bootstrap/app/planning_floor_type.gd").restore_areas(session, prepared.get("floor_areas_v1", []))
+	MAP_MODE.restore(session, prepared.get(MAP_MODE.KEY, ""))
 	LAMP_VISIBILITY.restore(session, prepared.get(LAMP_VISIBILITY.KEY, false))
 	QUESTS.restore(session, prepared)
 	session.edit_history.stack.clear()
