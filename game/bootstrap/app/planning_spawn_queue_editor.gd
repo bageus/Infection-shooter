@@ -6,6 +6,7 @@ extends VBoxContainer
 signal changed(config: Dictionary)
 
 const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.gd")
+const MAP_MODE := preload("res://game/bootstrap/app/planning_map_mode.gd")
 
 var queue_option: OptionButton
 var add_queue_button: Button
@@ -28,6 +29,7 @@ var damage_spin: SpinBox
 var loot_option: OptionButton
 var loot_chance_row: HBoxContainer
 var loot_chance_spin: SpinBox
+var web_box: VBoxContainer
 var current := 0
 var _config := SPAWN_CONFIG.defaults()
 var _updating := false
@@ -66,6 +68,8 @@ func _init() -> void:
 	loot_option = _option_row("Лут врагов дыры", SPAWN_CONFIG.LOOT_LABELS)
 	loot_chance_spin = _spin_row("Выпадение, %", 0.0, 100.0, 5.0)
 	loot_chance_row = loot_chance_spin.get_parent()
+	web_box = VBoxContainer.new()
+	add_child(web_box)
 
 
 func config() -> Dictionary:
@@ -104,7 +108,98 @@ func load_config(new_config: Dictionary, queue_index: int = -1) -> void:
 	loot_option.select(maxi(SPAWN_CONFIG.LOOT_MODES.find(str(loot["mode"])), 0))
 	loot_chance_spin.set_value_no_signal(float(loot["chance"]))
 	loot_chance_row.visible = str(loot["mode"]) == "manual"
+	_load_web()
 	_updating = false
+
+
+## Web map: wave growth, new kinds and the Horde hole role (spawn_config "web").
+func _load_web() -> void:
+	for child in web_box.get_children():
+		web_box.remove_child(child)
+		child.queue_free()
+	web_box.visible = MAP_MODE.is_web()
+	if not web_box.visible:
+		return
+	if not _config.has("web"):
+		_config["web"] = SPAWN_CONFIG.default_web()
+	var web: Dictionary = _config["web"]
+	var title := Label.new()
+	title.text = "ВЕБ: волны"
+	web_box.add_child(title)
+	var role := OptionButton.new()
+	for label in SPAWN_CONFIG.WEB_ROLE_LABELS:
+		role.add_item(label)
+	role.select(maxi(SPAWN_CONFIG.WEB_ROLES.find(str(web["role"])), 0))
+	role.item_selected.connect(func(index: int) -> void: _web_set("role", SPAWN_CONFIG.WEB_ROLES[index]))
+	web_box.add_child(role)
+	if str(web["role"]) == "boss":
+		_web_spin("Появится в волне №", "boss_wave", 1, SPAWN_CONFIG.WAVE_MAX, 1)
+		return
+	_web_spin("Прибавка врагов за волну", "add", 0, SPAWN_CONFIG.COUNT_MAX, 1)
+	_web_spin("Мин. врагов в волне", "min", 1, SPAWN_CONFIG.COUNT_MAX, 1)
+	_web_spin("Макс. врагов в волне", "max", 1, SPAWN_CONFIG.COUNT_MAX, 1)
+	_web_spin("Рост живучести за волну, %", "health_step", 0.0, 50.0, 1.0)
+	_web_spin("Рост урона за волну, %", "damage_step", 0.0, 50.0, 1.0)
+	var unlocks: Array = web["unlocks"]
+	for index in unlocks.size():
+		_unlock_rows(index, unlocks[index])
+	var add := _button(web_box, "+ Новый тип врага", func() -> void:
+		web["unlocks"].append(SPAWN_CONFIG.default_unlock())
+		_commit())
+	add.disabled = unlocks.size() >= SPAWN_CONFIG.WEB_UNLOCKS_MAX
+
+
+func _web_spin(text: String, key: String, low: float, high: float, step: float) -> void:
+	var row := HBoxContainer.new()
+	var label := Label.new()
+	label.text = text
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(label)
+	var spin := _spin(low, high, step)
+	spin.set_value_no_signal(float(_config["web"][key]))
+	spin.value_changed.connect(func(value: float) -> void: _web_set(key, value))
+	row.add_child(spin)
+	web_box.add_child(row)
+
+
+func _web_set(key: String, value: Variant) -> void:
+	if not _updating:
+		_config["web"][key] = value
+		_commit()
+
+
+## One new kind: which enemy, from which wave, % replaced at start, more per wave, the cap.
+func _unlock_rows(index: int, unlock: Dictionary) -> void:
+	var head := HBoxContainer.new()
+	var kind := OptionButton.new()
+	kind.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for label in SPAWN_CONFIG.ENEMY_LABELS:
+		kind.add_item(label)
+	kind.select(maxi(SPAWN_CONFIG.ENEMIES.find(str(unlock["enemy"])), 0))
+	kind.item_selected.connect(func(selected: int) -> void: _unlock_set(index, "enemy", SPAWN_CONFIG.ENEMIES[selected]))
+	head.add_child(kind)
+	_button(head, "×", func() -> void:
+		_config["web"]["unlocks"].remove_at(index)
+		_commit())
+	web_box.add_child(head)
+	var grid := GridContainer.new()
+	grid.columns = 4
+	for caption in ["С волны", "Замена %", "+за волну", "Макс."]:
+		var label := Label.new()
+		label.text = caption
+		grid.add_child(label)
+	for key: String in ["from_wave", "share", "step", "cap"]:
+		var spin := _spin(1 if key == "from_wave" else 0, 100 if key == "share" else SPAWN_CONFIG.COUNT_MAX, 1)
+		spin.set_value_no_signal(float(unlock[key]))
+		spin.value_changed.connect(func(value: float) -> void: _unlock_set(index, key, value))
+		grid.add_child(spin)
+	web_box.add_child(grid)
+
+
+func _unlock_set(index: int, key: String, value: Variant) -> void:
+	if not _updating:
+		_config["web"]["unlocks"][index][key] = value
+		_commit()
 
 
 func _load_entries(queue: Dictionary) -> void:

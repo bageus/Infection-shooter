@@ -80,7 +80,67 @@ static func sanitize(raw: Variant) -> Dictionary:
 	if queues.is_empty():
 		queues.append(sanitize_queue(source))
 	queues[0]["start"] = "trigger"
-	return {"queues": queues, "loot": sanitize_loot(source.get("loot"))}
+	var result := {"queues": queues, "loot": sanitize_loot(source.get("loot"))}
+	if source.get("web") is Dictionary:
+		result["web"] = sanitize_web(source["web"])
+	return result
+
+
+## Web arena settings of a hole (only present on web maps). role "wave": the first queue is the
+## wave 1 queue and grows each wave (see web_waves.gd). role "boss": spawns one Horde in `boss_wave`.
+## unlocks: [{enemy, from_wave, share (% of the wave replaced at from_wave), step (more replaced per
+## wave), cap (most replaced of that kind)}]; the new kind replaces the first kind of the queue.
+const WEB_ROLES: Array[String] = ["wave", "boss"]
+const WEB_ROLE_LABELS: Array[String] = ["Волны", "Орда (босс)"]
+const WEB_UNLOCKS_MAX := 4
+const WAVE_MAX := 200
+
+
+static func default_web() -> Dictionary:
+	return {"role": "wave", "add": 2, "min": 5, "max": 40, "health_step": 5.0, "damage_step": 5.0, "unlocks": [], "boss_wave": 10}
+
+
+static func default_unlock() -> Dictionary:
+	return {"enemy": "revenant", "from_wave": 3, "share": 10.0, "step": 1, "cap": 15}
+
+
+static func sanitize_web(raw: Variant) -> Dictionary:
+	var web := default_web()
+	if not raw is Dictionary:
+		return web
+	var source: Dictionary = raw
+	if str(source.get("role", "")) in WEB_ROLES:
+		web["role"] = str(source["role"])
+	for key: String in ["add", "min", "max"]:
+		if _number(source.get(key)):
+			web[key] = clampi(int(source[key]), 0 if key == "add" else 1, COUNT_MAX)
+	web["max"] = maxi(int(web["max"]), int(web["min"]))
+	for key: String in ["health_step", "damage_step"]:
+		if _number(source.get(key)):
+			web[key] = clampf(float(source[key]), 0.0, 50.0)
+	if _number(source.get("boss_wave")):
+		web["boss_wave"] = clampi(int(source["boss_wave"]), 1, WAVE_MAX)
+	var unlocks: Array[Dictionary] = []
+	if source.get("unlocks") is Array:
+		for item: Variant in source["unlocks"]:
+			if unlocks.size() < WEB_UNLOCKS_MAX and item is Dictionary:
+				unlocks.append(_unlock(item))
+	web["unlocks"] = unlocks
+	return web
+
+
+static func _unlock(source: Dictionary) -> Dictionary:
+	var unlock := default_unlock()
+	if str(source.get("enemy", "")) in ENEMIES:
+		unlock["enemy"] = str(source["enemy"])
+	if _number(source.get("from_wave")):
+		unlock["from_wave"] = clampi(int(source["from_wave"]), 1, WAVE_MAX)
+	if _number(source.get("share")):
+		unlock["share"] = clampf(float(source["share"]), 0.0, 100.0)
+	for key: String in ["step", "cap"]:
+		if _number(source.get(key)):
+			unlock[key] = clampi(int(source[key]), 0, COUNT_MAX)
+	return unlock
 
 
 ## Unknown modes fall back to auto (the usual drops), so maps saved before this setting keep them.
