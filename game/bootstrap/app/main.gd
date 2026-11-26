@@ -374,7 +374,7 @@ func _end_run(reason: String) -> void:
 		boom.finished.connect(boom.queue_free)
 		add_child(boom)
 		boom.play()
-	game_over.call("show_screen", kind, reason_key)
+	game_over.call("show_screen", kind, reason_key, has_node("LevelEntries") and $LevelEntries.chain.is_checkpoint($LevelEntries.chain.index_of(current_level)))
 	game_over.move_to_front()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = true

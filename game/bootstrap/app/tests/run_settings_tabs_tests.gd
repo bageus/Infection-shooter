@@ -279,11 +279,14 @@ func _check_about(menu: Node) -> void:
 		if label.text == "VECTRION":
 			found = true
 			_check(label.horizontal_alignment == HORIZONTAL_ALIGNMENT_CENTER, "VECTRION heading is centred")
-	_check(found, "Company heading exists")
+	_check(found, "Lore heading exists")
+	menu.close_dialog()
+	menu.activate("about_us")
+	await process_frame
 	var credit_lines := 0
 	for label: Label in menu.modal.find_children("*", "Label", true, false):
 		credit_lines += int(label.text.contains("http"))
-	_check(credit_lines >= 15, "About lists the attribution-required sound credits")
+	_check(credit_lines >= 15, "About us lists the attribution-required sound credits")
 
 
 ## Web builds fix these values in code: checked on the pure rule, since headless tests run as desktop.

@@ -139,7 +139,7 @@ func _test_results_and_return(app: Node) -> void:
 	_check(result.get("reason_key") == "failedMutation", "defeat reason is localized")
 	var boom := app.get_children().filter(func(n): return n is AudioStreamPlayer and n.stream.resource_path.ends_with("music_cinematic_boom.ogg"))
 	_check(boom.size() == 1 and boom[0].process_mode == Node.PROCESS_MODE_ALWAYS, "defeat plays the boom while paused")
-	_check(result.get("buttons")[0].disabled, "checkpoint is honestly unavailable")
+	_check(not result.get("buttons")[0].disabled, "failed screen restarts without a confirmation")
 	var infection: Node = app.get("infection_runtime")
 	app.set("progression_level_id", "menu_test_floor")
 	infection.call("begin_control_level", "menu_test_floor")
@@ -149,7 +149,7 @@ func _test_results_and_return(app: Node) -> void:
 	app.call("_end_run", "MISSION COMPLETE")
 	_check(infection.call("get_critical_threshold") == minf(95.0, before + 5.0), "Repeated completion cannot grant another ampule")
 	_check(result.get("screen_kind") == "complete", "floor goal uses success artwork")
-	_check(result.call("text", "samples") == "Floor", "success describes current floor instead of campaign extraction")
+	_check(result.call("text", "missionDone") == "Objective complete", "success screen names the completed objective")
 	var app_id := app.get_instance_id()
 	result.call("dispatch", "restart")
 	var deadline := Time.get_ticks_msec() + 90000

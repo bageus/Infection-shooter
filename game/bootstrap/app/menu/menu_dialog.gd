@@ -6,6 +6,7 @@ var settings_tab := 0
 
 const STYLE := preload("res://game/bootstrap/app/menu/menu_style.gd")
 const DEBUG_MAP_PICKER := preload("res://game/bootstrap/app/menu/debug_map_picker.gd")
+const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
 const MARK := preload("res://assets/interface/branding/vectrion_mark.svg")
 var view
 var kind := ""
@@ -43,7 +44,7 @@ func setup(owner_view: Control, dialog_kind: String) -> void:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	if kind == "settings":
 		scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	if kind == "about":
+	if kind == "about" or kind == "about_us":
 		var body := VBoxContainer.new()
 		body.add_theme_constant_override("separation", 16)
 		panel.add_child(body)
@@ -82,14 +83,20 @@ func _build() -> void:
 			for index in range(1, 7):
 				_heading("corpChapter" + str(index))
 				_copy("corpHistory" + str(index))
-			_credits()
-			var back := _button("back", view.close_dialog)
-			back.reparent(_fixed_actions)
+			_back_button()
+		"about_us":
+			_heading("aboutUs")
+			_copy("developer")
+			_copy("creditsModels")
+			_copy("creditsFont")
+			_copy("creditsAudio")
+			_audio_credits()
+			_social_links()
+			_back_button()
 		"briefing":
-			_heading("briefingTitle")
-			for index in range(1, 4):
-				_copy("brief" + str(index), str(index) + ". ")
-			_copy("warning")
+			_heading("new")
+			if not CHECKPOINT.passed_map().is_empty():
+				_copy("newWarning")
 			_button("deploy", view.dispatch.bind("start"))
 			_button("back", view.close_dialog)
 		"load_map":
@@ -103,12 +110,22 @@ func _build() -> void:
 			_button("cancel", view.close_dialog)
 
 
+func _social_links() -> void:
+	for entry in [["x.com/Infection_sh0tr", "https://x.com/Infection_sh0tr"],
+			["instagram.com/infection.shooter", "https://www.instagram.com/infection.shooter/"],
+			["tiktok.com/@infection.shooter", "https://www.tiktok.com/@infection.shooter"]]:
+		var link := LinkButton.new()
+		link.text = entry[0]
+		link.uri = entry[1]
+		layout.add_child(link)
+
+
+func _back_button() -> void:
+	_button("back", view.close_dialog).reparent(_fixed_actions)
+
+
 # Attribution for CC-BY / CC-BY-SA sources; CREDITS.md itself is not exported.
-func _credits() -> void:
-	_heading("credits")
-	_copy("creditsModels")
-	_copy("creditsFont")
-	_copy("creditsAudio")
+func _audio_credits() -> void:
 	var file := FileAccess.open("res://assets/interface/credits.json", FileAccess.READ)
 	var data: Variant = JSON.parse_string(file.get_as_text()) if file != null else null
 	if not data is Dictionary:
