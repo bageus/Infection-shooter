@@ -228,6 +228,10 @@ func _test_pools() -> void:
 	for index in range(30):
 		lamps.append(_lamp("point", Vector3(index * 0.05, 3.0, 0.0)))
 	controller.refresh_light_budget()
+	# Lamps that just turned on are still fading in and keep their pool; let the fades finish first.
+	for lamp in lamps:
+		lamp.call("_process", 1.0)
+	controller.refresh_light_budget()
 	var pools := controller.get("_pool") as MultiMeshInstance3D
 	var dark := 0
 	for lamp in lamps:
@@ -289,6 +293,7 @@ func _test_model_lamps() -> void:
 			_check(not glow.visible, "%s goes dark when switched off" % file)
 			_check(_lit_lenses(prop) == 0, "%s lens goes dark when switched off" % file)
 			prop.call("configure_display", {"power": "on"})
+			glow.call("_process", 1.0) # the light fades in over 0.25 s
 			_check(glow.visible, "%s glows again when switched on" % file)
 			_check(_lit_lenses(prop) > 0, "%s lens glows when switched on" % file)
 			prop.call("_put_out_lamp")

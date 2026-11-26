@@ -45,6 +45,7 @@ const POOL_RADIUS := 2.5
 const POOL_STRENGTH := 0.5
 const POOL_HEIGHT := 0.03
 var _pool: MultiMeshInstance3D
+var _pool_lamps: Array[Node] = []
 var shadows_allowed := true
 var _refresh_left := 0.0
 var _shadow_owners := {}
@@ -105,6 +106,7 @@ func _process(delta: float) -> void:
 			refresh_light_budget(false)
 		elif _budget_changed():
 			refresh_light_budget()
+	_update_pool_fades()
 
 
 ## Poll only budget inputs; avoid ranking, frustum construction and lamp writes at rest.
@@ -222,6 +224,9 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 		var shadow: bool = lit and shadows_allowed and shadowed + cost <= mini(MAX_SHADOW_LIGHTS, light_cap)
 		if lit:
 			used += cost
+			# A lamp still fading in keeps its pool, which fades out as its light fades in.
+			if entry.seen and _fade_of(lamp) < 1.0:
+				unlit.append(lamp)
 		elif entry.seen:
 			unlit.append(lamp)
 		if shadow:
@@ -240,7 +245,20 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 	_update_pools(unlit)
 
 
-## Draws one flat light pool per in-view lamp that the budget left dark.
+## Lamp's fade-in share (0 dark, 1 fully lit); lamps without a fade count as dark.
+static func _fade_of(lamp) -> float:
+	return float(lamp.call("get_budget_fade")) if lamp.has_method("get_budget_fade") else 0.0
+
+
+## Pool colour: the lamp's colour and strength, scaled by the share its own light does not show.
+func _pool_color(lamp, fade: float) -> Color:
+	var footprint: Vector2 = lamp.call("get_pool_footprint") if lamp.has_method("get_pool_footprint") \
+		else Vector2(POOL_RADIUS, POOL_STRENGTH)
+	var color: Color = lamp.get("light_color")
+	return color * footprint.y * (1.0 - fade)
+
+
+## Draws one flat light pool per in-view lamp that the budget leaves dark or still fading in.
 func _update_pools(unlit: Array[Node]) -> void:
 	if _pool == null:
 		var gradient := Gradient.new()
@@ -272,15 +290,26 @@ func _update_pools(unlit: Array[Node]) -> void:
 		add_child(_pool)
 	var floor_turn := Basis(Vector3.RIGHT, -PI * 0.5)
 	_pool.multimesh.instance_count = unlit.size()
+	_pool_lamps = unlit
 	for index in unlit.size():
 		var lamp := unlit[index] as Node3D
 		var at := lamp.global_position
 		var footprint: Vector2 = lamp.call("get_pool_footprint") if lamp.has_method("get_pool_footprint") \
 			else Vector2(POOL_RADIUS, POOL_STRENGTH)
 		_pool.multimesh.set_instance_transform(index, Transform3D(floor_turn.scaled(Vector3.ONE * footprint.x), Vector3(at.x, POOL_HEIGHT, at.z)))
-		var color: Color = lamp.get("light_color")
-		_pool.multimesh.set_instance_color(index, color * footprint.y)
+		_pool.multimesh.set_instance_color(index, _pool_color(lamp, _fade_of(lamp)))
 	_pool.visible = local_lights_enabled
+
+
+## Every frame: pools fade out as their lamps fade in, and back in as they fade out.
+func _update_pool_fades() -> void:
+	if _pool == null or not _pool.visible:
+		return
+	for index in mini(_pool_lamps.size(), _pool.multimesh.instance_count):
+		var lamp = _pool_lamps[index]
+		# A lamp can be freed between budget refreshes (map change, planner delete); its pool just stops fading.
+		if is_instance_valid(lamp):
+			_pool.multimesh.set_instance_color(index, _pool_color(lamp, _fade_of(lamp)))
 
 
 func _light_radius(lamp: Node) -> float:
