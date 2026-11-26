@@ -32,6 +32,7 @@ func _run() -> void:
 	menu.set_script(SCREEN)
 	root.add_child(menu)
 	menu.get("preferences").values.language = "ru"
+	menu.get("preferences").values.volume = 0.0 # a playing click would still hold its audio stream at exit
 	_check(menu.shop == null, "no shop on a platform without the endless mode")
 	menu.shop_enabled = true
 	menu.refresh()
@@ -56,5 +57,7 @@ func _run() -> void:
 	await process_frame
 	_check(menu.shop == null, "no shop outside the main menu")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(WALLET.path))
+	menu.free()
+	await process_frame
 	print("web shop panel tests: %d failures" % failures)
 	quit(1 if failures > 0 else 0)
