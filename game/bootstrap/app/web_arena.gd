@@ -8,6 +8,7 @@ const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.
 const SHOP := preload("res://game/bootstrap/app/web_shop.gd")
 const WALLET := preload("res://game/bootstrap/app/web_wallet.gd")
 const POOL := preload("res://game/bootstrap/app/web_arena_pool.gd")
+const MEDKITS := preload("res://game/bootstrap/app/web_medkits.gd")
 const LEVEL_CAPTION := preload("res://game/bootstrap/app/level_caption.gd")
 
 
@@ -75,6 +76,7 @@ static func _show_coins(main: Node) -> void:
 ## A new web run starts from the shop stock: bought and rented weapons (two free slots), ammo that fits,
 ## antidotes and armor. Stock that does not fit stays in the shop.
 static func begin_run(main: Node) -> void:
+	MEDKITS.begin(main)
 	if not MAP_MODE.is_web() or main.has_meta(&"web_run"):
 		return
 	var player: Node = main.get("player")
@@ -105,6 +107,7 @@ static func begin_run(main: Node) -> void:
 
 ## Ammo taken into the run and not spent goes back to the shop stock; safe to call twice.
 static func end_run(main: Node) -> void:
+	MEDKITS.end(main)
 	if not main.has_meta(&"web_run"):
 		return
 	var taken: Dictionary = main.get_meta(&"web_run")

@@ -104,11 +104,24 @@ func _general() -> void:
 	if not web:
 		_enemy_modes()
 	_enemy_difficulty()
+	if web or OS.is_debug_build():
+		_medkit_row()
 	if not web:
 		_debug_rows()
 	_comfort_rows()
 	if not web:
 		_tuning_sliders()
+
+
+## Shows the medkit button (next to the antidote icon, key H) during a run.
+func _medkit_row() -> void:
+	var medkits := CheckButton.new()
+	medkits.name = "ActiveMedkits"
+	medkits.text = dialog.view.text("activeMedkits")
+	medkits.tooltip_text = dialog.view.text("activeMedkitsHint")
+	medkits.button_pressed = dialog.view.preferences.values.active_medkits
+	medkits.toggled.connect(func(value: bool) -> void: dialog.call("_change", "active_medkits", value))
+	dialog.get("layout").add_child(medkits)
 
 
 ## Debug toggles; web builds show no rows for them and apply_web_rules fixes their values.
