@@ -27,7 +27,6 @@ const OCCLUSION := preload("res://game/bootstrap/app/occlusion_effects.gd")
 const ENEMY_HEALTH_BARS := preload("res://game/bootstrap/app/enemy_health_bars.gd")
 const MISSION_LAYOUT := preload("res://game/bootstrap/app/mission_layout.gd")
 const LEVEL_ENTRIES := preload("res://game/bootstrap/app/level_entry_runtime.gd")
-const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
 const LEVEL_TEXT := preload("res://game/bootstrap/app/level_text.gd")
 const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_director.gd")
 
@@ -39,6 +38,7 @@ const WAVE_DIRECTOR := preload("res://game/features/spawning/public/wave_directo
 @onready var planning_root: Node3D = $PlanningObjects
 @onready var gameplay: Node3D = $Gameplay
 @onready var mutation_choice: Control = $MutationChoice
+@onready var prototype_hud: Node = $PrototypeHUD
 @onready var infection_runtime: Node = $Gameplay/Player/InfectionRuntime
 
 var world_bindings: RefCounted
@@ -231,6 +231,10 @@ func set_floor_hints_enabled(enabled: bool) -> void:
 		mission_layout.call("set_floor_hints_enabled", enabled)
 
 
+func set_perf_counters_enabled(show_fps: bool, show_enemies: bool) -> void:
+	if is_instance_valid(prototype_hud):
+		prototype_hud.call("set_perf_counters_visible", show_fps, show_enemies)
+
 ## Settings: a small health bar above each live enemy.
 func set_enemy_health_bars_enabled(enabled: bool) -> void:
 	if is_instance_valid(enemy_health_bars):
@@ -356,8 +360,6 @@ func _choose_enhanced_ammo() -> void:
 func _end_run(reason: String) -> void:
 	_ended = true
 	var kind := "complete" if reason == "MISSION COMPLETE" else "failed"
-	if kind == "complete":
-		CHECKPOINT.on_completed(current_level)
 	var reason_key: String = {"MUTATION OVERTOOK YOU": "failedMutation",
 		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "YOU DIED": "failedHealth"}.get(reason, "")
 	if kind == "complete" and not is_instance_valid(completion_music):

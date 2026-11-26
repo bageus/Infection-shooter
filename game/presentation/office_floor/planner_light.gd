@@ -59,7 +59,8 @@ func _ready() -> void:
 		marker.visible = false
 	if light != null:
 		_authored_range = light.spot_range
-		light.shadow_caster_mask = WALL_CASTER_LAYER
+		# Highest shadow quality (set on the tree by PlanningLighting): lamps shadow every object, not only walls.
+		set_all_casters(get_tree().get_meta(&"lamp_all_casters", false))
 		if not has_meta("planning_light_color"):
 			# Old authored scenes keep their original per-instance color.
 			light_color = light.light_color
@@ -107,6 +108,11 @@ func _process(delta: float) -> void:
 		_flicker_factor = lerpf(_flicker_factor, _target_factor, minf(delta * (24.0 if flicker_mode == 1 else 4.0), 1.0))
 	_apply_energy()
 	set_process(_needs_process())
+
+
+func set_all_casters(all: bool) -> void:
+	if light != null:
+		light.shadow_caster_mask = 0xFFFFF if all else WALL_CASTER_LAYER
 
 
 func _budget_target() -> float:

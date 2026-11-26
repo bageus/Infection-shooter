@@ -62,7 +62,7 @@ func _action(action: String) -> void:
 			loader.set("completion_music", completion_music)
 			loader.set("checkpoint_notice", true)
 			completion_music = null
-			loader.start_map(CHECKPOINT.map_file(map_name), map_name, {})
+			loader.start_map(CHECKPOINT.map_file(map_name), map_name, {}, CHECKPOINT.passed_carry())
 		"quit":
 			if OS.has_feature("web"):
 				menu.reason_key = "webQuit"

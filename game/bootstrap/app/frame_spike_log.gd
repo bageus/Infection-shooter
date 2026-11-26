@@ -22,6 +22,7 @@ var _path := PATH
 var _rigid_bodies: Array = []
 var _rigid_at := 0
 var _session_marked := false
+var _last_render := ""
 var _awake_last := 0
 var _script_last := 0
 var _script_seen := {}
@@ -105,6 +106,20 @@ func _top_scripts() -> String:
 	return ",".join(keys.slice(0, 3).map(func(key) -> String: return "%s:%.1f" % [key, spent[key] / 1000.0]))
 
 
+## Shadow and GPU state, so a log shows why shadows are missing on one machine.
+func _render_line(tree: SceneTree) -> String:
+	var scene := tree.current_scene if tree != null else null
+	var sun := scene.get_node_or_null("GlobalOverheadLight") as DirectionalLight3D if scene != null else null
+	var sun_text := "none" if sun == null else "vis=%s shadow=%s dist=%.1f" % [sun.visible, sun.shadow_enabled, sun.directional_shadow_max_distance]
+	var lamps := 0
+	for lamp in tree.get_nodes_in_group("budget_lights") if tree != null else []:
+		var spot := lamp.get("light") as SpotLight3D
+		lamps += 1 if spot != null and spot.shadow_enabled and spot.is_visible_in_tree() else 0
+	var lighting := scene.get_node_or_null("PlanningLighting") if scene != null else null
+	var lights := "?" if lighting == null else "%s/cap=%d/shadows_allowed=%s" % [lighting.get("local_lights_enabled"), lighting.get("light_cap"), lighting.get("shadows_allowed")]
+	return "# render: lights=" + lights + " gpu=%s driver=%s sun[%s] positional_atlas=%d shadow_lamps=%d scale3d=%.2f" % [RenderingServer.get_video_adapter_name(), RenderingServer.get_current_rendering_driver_name(), sun_text, tree.root.positional_shadow_atlas_size if tree != null else 0, lamps, tree.root.scaling_3d_scale if tree != null else 1.0]
+
+
 func _write(msec: float, resources: int, nodes: int, tree: SceneTree, woke: int, scripts_usec: int, top: String, marks: Array[String]) -> void:
 	var player := tree.get_first_node_in_group("player") as Node3D if tree != null else null
 	var at := "%.1f,%.1f" % [player.global_position.x, player.global_position.z] if player != null else "?"
@@ -116,6 +131,10 @@ func _write(msec: float, resources: int, nodes: int, tree: SceneTree, woke: int,
 		_session_marked = true
 		# The file is appended across runs and builds; this line lets a log be split per run.
 		file.store_line("# session start %s" % Time.get_datetime_string_from_system())
+	var render := _render_line(tree)
+	if render != _last_render:
+		_last_render = render
+		file.store_line(render)
 	var viewport := tree.root.get_viewport_rid() if tree != null else RID()
 	var render_cpu := RenderingServer.viewport_get_measured_render_time_cpu(viewport) if viewport.is_valid() else 0.0
 	var render_gpu := RenderingServer.viewport_get_measured_render_time_gpu(viewport) if viewport.is_valid() else 0.0

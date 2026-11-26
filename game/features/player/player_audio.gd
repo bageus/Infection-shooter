@@ -31,7 +31,7 @@ const PASSIVE_SOUNDS := {"second_heart": &"skill_second_heart", "retaliation": &
 ## Matches the spore release delay in mutation_skill_effects.gd.
 const SPORE_DELAY := 2.0
 ## The backpack rattle follows each footstep by this much (a fraction of a second).
-const BACKPACK_RATTLE_DELAY := 0.1
+const BACKPACK_RATTLE_DELAY := 0.05
 
 var glass_surface_query: Callable
 var biomass_surface_query: Callable

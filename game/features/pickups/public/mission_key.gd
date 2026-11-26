@@ -1,6 +1,7 @@
 extends Node3D
 
 const BEACON := preload("res://game/features/pickups/public/pickup_beacon.gd")
+const MODEL := "res://models/objects/pickups/modern_key.glb"
 const GOLD := Color(0.95, 0.7, 0.16)
 const HOVER := 0.3
 
@@ -23,22 +24,12 @@ func _ready() -> void:
 	golden.emission_enabled = true
 	golden.emission = GOLD
 	golden.emission_energy_multiplier = 0.25
-	# Same outline as the HUD icon: bow ring on the left, shaft, two bit teeth.
-	var ring := TorusMesh.new()
-	ring.inner_radius = 0.085
-	ring.outer_radius = 0.16
-	ring.material = golden
-	_add_mesh(ring, Vector3(-0.28, 0, 0), Vector3(PI * 0.5, 0, 0))
-	var shaft := CylinderMesh.new()
-	shaft.top_radius = 0.032
-	shaft.bottom_radius = 0.032
-	shaft.height = 0.5
-	shaft.radial_segments = 12
-	shaft.material = golden
-	_add_mesh(shaft, Vector3(0.06, 0, 0), Vector3(0, 0, PI * 0.5))
-	_add_bar(Vector3(-0.11, 0, 0), Vector3(0.05, 0.11, 0.08), golden)
-	_add_bar(Vector3(0.2, -0.065, 0), Vector3(0.06, 0.13, 0.05), golden)
-	_add_bar(Vector3(0.3, -0.05, 0), Vector3(0.06, 0.1, 0.05), golden)
+	# Flat modern key (Blender, models/objects/pickups): rounded head with a hole, blade with bit cuts.
+	var model := (load(MODEL) as PackedScene).instantiate() as Node3D
+	for mesh in model.find_children("*", "MeshInstance3D"):
+		(mesh as MeshInstance3D).material_override = golden
+		(mesh as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_art.add_child(model)
 	_art.scale = Vector3.ONE * 1.2
 	# The beacon keeps its orientation while the key spins; its arrow waits for reveal_arrow().
 	_beacon = BEACON.make(GOLD, 0.7, 1.15, 0.9)
@@ -54,22 +45,6 @@ func settle_on_floor() -> void:
 # The mission calls this once the player has searched for a while; the arrow then blinks above the key.
 func reveal_arrow() -> void:
 	_beacon.call("set_arrow_visible", true)
-
-
-func _add_mesh(mesh: Mesh, offset: Vector3, rotated := Vector3.ZERO) -> void:
-	var instance := MeshInstance3D.new()
-	instance.mesh = mesh
-	instance.position = offset
-	instance.rotation = rotated
-	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_art.add_child(instance)
-
-
-func _add_bar(offset: Vector3, dimensions: Vector3, material: Material) -> void:
-	var bar := BoxMesh.new()
-	bar.size = dimensions
-	bar.material = material
-	_add_mesh(bar, offset)
 
 
 func _process(delta: float) -> void:

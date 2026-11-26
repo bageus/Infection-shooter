@@ -127,6 +127,9 @@ func _blood(player: Node3D) -> void:
 		_check(not mark.find_children("*", "Decal", true, false).is_empty() or not mark.find_children("*", "MeshInstance3D", true, false).is_empty() or not (mark.get("_projected") as Array).is_empty(), "Blood marks have a texture-bearing visual")
 	_check(floor_count >= burst, "Rupture spreads over the floor")
 	effects.call("clear_marks")
+	# The walking trail starts only below half health (the hit above leaves single stains).
+	player.set("health", float(player.get("max_health")) * 0.4)
+	player.set("_wound", float(player.get("max_health")) * 0.6)
 	player.set("_blood_motion_start", player.global_position)
 	player.position.x += .6
 	player.call("_update_move", 0.0)

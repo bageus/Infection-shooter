@@ -28,7 +28,7 @@ static func sanitize(raw: Variant) -> Dictionary:
 		"time": time,
 		"seconds": clampf(_number(source.get("seconds"), 14.0), SECONDS_MIN, SECONDS_MAX),
 		"absorb": absorb,
-		"units": clampf(_number(source.get("units"), 10.0), UNITS_MIN, UNITS_MAX),
+		"units": clampf(roundf(_number(source.get("units"), 10.0)), UNITS_MIN, UNITS_MAX), # whole units only
 		"radius": clampf(_number(source.get("radius"), RADIUS_DEFAULT), RADIUS_MIN, RADIUS_MAX),
 	}
 

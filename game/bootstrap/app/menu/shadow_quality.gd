@@ -38,20 +38,25 @@ static func apply(tree: SceneTree, enabled: bool, level: int) -> void:
 		return
 	if tree.root.positional_shadow_atlas_size != int(preset.atlas):
 		tree.root.positional_shadow_atlas_size = int(preset.atlas)
-	# Walls bake a contact strip on the floor only while real shadows are off.
-	WALL_BASE_SHADOW.set_shadows_allowed(tree, enabled)
-	# Characters get a soft blob under their feet while real shadows are off.
-	BLOB_SHADOW.track(tree)
-	BLOB_SHADOW.set_shadows_allowed(tree, enabled)
 	var scene := tree.current_scene
 	if scene == null:
+		WALL_BASE_SHADOW.set_shadows_allowed(tree, enabled)
+		BLOB_SHADOW.track(tree)
+		BLOB_SHADOW.set_shadows_allowed(tree, enabled)
 		return
 	var overhead := scene.get_node_or_null("GlobalOverheadLight") as DirectionalLight3D
+	# Without the sun nothing casts a real shadow under characters or along walls, so the fake ones stay.
+	var real := enabled and (overhead == null or overhead.visible)
+	WALL_BASE_SHADOW.set_shadows_allowed(tree, real)
+	BLOB_SHADOW.track(tree)
+	BLOB_SHADOW.set_shadows_allowed(tree, real)
 	if overhead != null:
 		overhead.directional_shadow_max_distance = float(preset.distance) if enabled else OFF_DISTANCE
 	var lighting := scene.get_node_or_null("PlanningLighting")
 	if lighting != null and lighting.has_method("set_shadows_allowed"):
 		lighting.call("set_shadows_allowed", enabled)
+		if lighting.has_method("set_object_shadows"):
+			lighting.call("set_object_shadows", enabled and level >= DEFAULT_LEVEL)
 	var wall := scene.get_node_or_null("DisplayWall")
 	if wall != null and wall.has_method("set_shadows_allowed"):
 		wall.call("set_shadows_allowed", enabled)

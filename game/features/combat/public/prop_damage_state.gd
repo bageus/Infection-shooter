@@ -33,7 +33,9 @@ var variant_index := -1
 var transition_pending := false
 var full_break := false
 var collapses := false # Cardboard and big crates: no staged pieces, so they break apart on their own.
-var indestructible := false
+var _listed_indestructible := false
+var _breaks_from := 2
+var _level_of := Callable() # Live destruction quality (0 Low, 1 Medium, 2 High); High when unset.
 var short_circuited := false
 var paper_torn := false
 var extinguisher_triggered := false
@@ -64,18 +66,26 @@ static func breaks_from_level(model_name: String) -> int:
 	return 2
 
 
-func configure(model_name: String, variant_count: int, has_fragments: bool, quality: int = 2) -> void:
+func configure(model_name: String, variant_count: int, has_fragments: bool, level_of: Callable = Callable()) -> void:
 	var group := model_name.substr(0, 2)
 	category = "tech" if group == "05" or model_name in LAB_ELECTRONICS else ("small" if group in ["09", "11", "12"] else "large")
 	_variant_count = variant_count
 	_has_fragments = has_fragments
 	collapses = not has_fragments and (model_name.to_lower().contains("cardboard") or model_name in BIG_CRATES)
 	health = BROKEN_CRATE_HEALTH if model_name.begins_with("04_crate") else _stage_health()
-	indestructible = model_name in INDESTRUCTIBLE or quality < breaks_from_level(model_name)
+	_listed_indestructible = model_name in INDESTRUCTIBLE
+	_breaks_from = breaks_from_level(model_name)
+	_level_of = level_of
+
+
+## Checked on every hit: the quality setting can change while a prop is in the scene.
+func is_indestructible() -> bool:
+	var level: int = _level_of.call() if _level_of.is_valid() else 2
+	return _listed_indestructible or level < _breaks_from
 
 
 func hit(amount: float, weapon: String, book_stack: bool, wall_mounted: bool, anchored: bool, facade: bool) -> HitAction:
-	if indestructible:
+	if is_indestructible():
 		return HitAction.NONE
 	if book_stack and not broken:
 		health -= BALANCE.object_damage(amount, weapon, "small")

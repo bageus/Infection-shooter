@@ -35,6 +35,11 @@ const WAKE_PER_CHECK := 3
 static var level := DEFAULT
 
 
+## Read on every hit, so a setting changed mid-level applies to props already in the scene.
+static func current() -> int:
+	return level
+
+
 static func set_level(value: int) -> void:
 	level = clampi(value, 0, COUNT - 1)
 
