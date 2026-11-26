@@ -246,12 +246,12 @@ func refresh_light_budget(capture_inputs: bool = true) -> void:
 
 
 ## Lamp's fade-in share (0 dark, 1 fully lit); lamps without a fade count as dark.
-static func _fade_of(lamp: Node) -> float:
+static func _fade_of(lamp) -> float:
 	return float(lamp.call("get_budget_fade")) if lamp.has_method("get_budget_fade") else 0.0
 
 
 ## Pool colour: the lamp's colour and strength, scaled by the share its own light does not show.
-func _pool_color(lamp: Node, fade: float) -> Color:
+func _pool_color(lamp, fade: float) -> Color:
 	var footprint: Vector2 = lamp.call("get_pool_footprint") if lamp.has_method("get_pool_footprint") \
 		else Vector2(POOL_RADIUS, POOL_STRENGTH)
 	var color: Color = lamp.get("light_color")
@@ -306,8 +306,10 @@ func _update_pool_fades() -> void:
 	if _pool == null or not _pool.visible:
 		return
 	for index in mini(_pool_lamps.size(), _pool.multimesh.instance_count):
-		var lamp := _pool_lamps[index]
-		_pool.multimesh.set_instance_color(index, _pool_color(lamp, _fade_of(lamp)))
+		var lamp = _pool_lamps[index]
+		# A lamp can be freed between budget refreshes (map change, planner delete); its pool just stops fading.
+		if is_instance_valid(lamp):
+			_pool.multimesh.set_instance_color(index, _pool_color(lamp, _fade_of(lamp)))
 
 
 func _light_radius(lamp: Node) -> float:
