@@ -3,9 +3,13 @@ extends OmniLight3D
 ## budget kept by PlanningLighting, so it respects the lighting setting and the
 ## renderer's light limit, and it never casts shadows.
 
+const BUDGET_FADE_SECONDS := 0.25
+
 var _wanted := true
 var _local_enabled := false
 var _budget_lit := true
+var _full_energy := 0.0
+var _fade := 0.0
 
 
 static func create(color: Color, energy: float, light_range: float) -> OmniLight3D:
@@ -13,6 +17,7 @@ static func create(color: Color, energy: float, light_range: float) -> OmniLight
 	light.name = "BudgetLight"
 	light.light_color = color
 	light.light_energy = energy
+	light.set("_full_energy", energy)
 	light.omni_range = light_range
 	light.omni_attenuation = 1.2
 	light.shadow_enabled = false
@@ -22,6 +27,14 @@ static func create(color: Color, energy: float, light_range: float) -> OmniLight
 
 func _enter_tree() -> void:
 	add_to_group("budget_lights")
+
+
+## Fades the light in or out when the budget changes, so a lamp never pops on or off.
+func _process(delta: float) -> void:
+	_fade = move_toward(_fade, _target(), delta / BUDGET_FADE_SECONDS)
+	light_energy = _full_energy * _fade
+	visible = _fade > 0.0
+	set_process(_fade != _target())
 
 
 ## The prop decides whether it glows (door open, lamp intact).
@@ -48,5 +61,14 @@ func set_budget_lit(lit: bool, _shadow: bool) -> void:
 	_apply()
 
 
+func _target() -> float:
+	return 1.0 if _wanted and _local_enabled and _budget_lit else 0.0
+
+
+## Switching lighting off applies at once; only a budget change fades.
 func _apply() -> void:
-	visible = _wanted and _local_enabled and _budget_lit
+	if not (_wanted and _local_enabled):
+		_fade = 0.0
+		light_energy = 0.0
+		visible = false
+	set_process(_fade != _target() or _fade > 0.0)
