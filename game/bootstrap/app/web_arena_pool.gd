@@ -4,7 +4,8 @@ extends RefCounted
 
 const PREFIX := "arena_"
 const WALLET := preload("res://game/bootstrap/app/web_wallet.gd")
-const DIRS: Array[String] = ["res://content/levels", "user://maps"]
+const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
+const DIRS: Array[String] = [CAMPAIGN.MAPS_DIR, "user://maps"]
 
 
 ## Sorted unique arena map names found in `dirs`.
