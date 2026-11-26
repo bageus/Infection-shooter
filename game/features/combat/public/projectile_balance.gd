@@ -50,6 +50,9 @@ static func material_cost(material: String) -> float:
 const BLAST_BREAK_DAMAGE := 100000.0
 
 
+const UZI_PROP_SCALE := 28.0 / 15.0
+
+
 static func object_damage(amount: float, weapon: String, category: String) -> float:
 	if weapon == "GRENADE" and amount > 0.0:
 		return BLAST_BREAK_DAMAGE # A grenade blast breaks everything it reaches.
@@ -58,5 +61,5 @@ static func object_damage(amount: float, weapon: String, category: String) -> fl
 	if weapon == "SHOTGUN":
 		return amount * 0.75
 	if weapon == "UZI":
-		return amount * 0.9
+		return amount * UZI_PROP_SCALE # Uzi rounds (15) hit props as hard as AK rounds (28), so the same things break.
 	return amount

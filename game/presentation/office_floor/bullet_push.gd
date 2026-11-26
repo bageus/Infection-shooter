@@ -31,11 +31,11 @@ static func shot(body: RigidBody3D, weight_kg: float, weapon: String, direction:
 		fly_off(body, direction)
 
 
-# A pistol round throws only the bottle; paint cans and barrels fly from every other weapon.
+# Pistol and Uzi rounds only nudge paint cans and barrels; the bottle flies from any weapon.
 static func flies_off(model_path: String, weapon: String) -> bool:
 	if "09_plastic_water_bottle" in model_path:
 		return true
-	return weapon.to_upper() != "PISTOL" and FLY_OFF_ITEMS.any(func(item: String) -> bool: return item in model_path)
+	return weapon.to_upper() not in ["PISTOL", "UZI"] and FLY_OFF_ITEMS.any(func(item: String) -> bool: return item in model_path)
 
 
 ## A plastic bottle is light: a hit throws it off its shelf instead of nudging it (apply caps at MAX_SPEED).

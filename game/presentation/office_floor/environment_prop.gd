@@ -46,6 +46,7 @@ const DISPLAY_VIEW := preload("res://game/presentation/office_floor/display_view
 const DISPLAY_PROFILES := preload("res://game/presentation/office_floor/display_surface_profiles.gd")
 const SURFACE_DECOR := preload("res://game/presentation/office_floor/office_surface_decor.gd")
 const IMPACT_MATERIAL := preload("res://game/presentation/office_floor/environment_impact_material.gd")
+const MATERIAL_SPEC := preload("res://game/presentation/office_floor/prop_material_spec.gd")
 
 @export_file("*.glb") var model_path := ""
 @export_enum("on", "off", "auto") var display_power := "auto"
@@ -326,6 +327,7 @@ func get_projectile_material(shape_index: int = -1) -> String:
 		# Electronics keep their glass screen (shattering it dropped a monitor through its desk).
 		if _damage.category != "tech" and mesh_index >= 0 and mesh_index < _shape_meshes.size() and is_instance_valid(_shape_meshes[mesh_index]) and GEOMETRY.is_glass_mesh(_shape_meshes[mesh_index]):
 			return "glass"
+	if MATERIAL_SPEC.material_of(model_path.get_file()) != "": return MATERIAL_SPEC.material_of(model_path.get_file())
 	var group := model_path.get_file().substr(0, 2)
 	if model_path.get_file().begins_with("09_stepladder"): return "metal" # Group 09 is light; the ladder rings like steel.
 	if group == "01": return "concrete"
@@ -334,8 +336,6 @@ func get_projectile_material(shape_index: int = -1) -> String:
 	if group == "03" or group == "06": return "metal"
 	return "wood"
 
-
-# Group 03 is mostly metal, but shelves and cabinets ring like wood. Bullet cost stays with get_projectile_material.
 ## Coolers are loose now: a shot shoves them whether the bottle is still on or not.
 func _push_cooler(hit_position: Vector3, direction: Vector3, weapon: String) -> void:
 	if "02_water_cooler" in model_path:

@@ -16,6 +16,10 @@ const INDESTRUCTIBLE := [
 	"MRI_Scanner.glb", "X_Ray_System.glb", "Hyperbaric_Chamber.glb", "Medical_Instrument_Cabinet.glb",
 	"Laboratory_Storage_Cabinet.glb", "Laboratory_Drying_Cabinet.glb", "Morgue_Drawers_3x3.glb",
 	"Laboratory_Fridge.glb", "Containment_Tank_No_Subject.glb", "Containment_Tank_hunger.glb",
+	# Spec 26.11.2026: VECTRION, pipes, ducts and steel barrels take no weapon damage (barrels still fly).
+	"01_VECTRION_Destructible.glb", "01_duct_rect_straight.glb", "01_duct_rect_elbow.glb", "01_pipe_sewer_floor_elbow.glb",
+	"01_pipe_sewer_floor_straight.glb", "01_pipe_sewer_wall_elbow.glb", "01_pipe_water_floor_elbow.glb",
+	"01_pipe_water_floor_straight.glb", "01_pipe_water_wall_straight.glb", "15_barrel_green.glb", "15_barrel_blue.glb", "15_barrel_rust.glb",
 ]
 ## Appliances whose electronics break from Low (microwave, coffee machine, arcade cabinets).
 const ELECTRONICS_02 := ["02_microwave_destructible.glb", "02_coffee_machine_destructible.glb", "02_arcade_machine_V1.glb", "02_arcade_machine_V2.glb", "02_arcade_machine_V3.glb", "02_arcade_machine_V4.glb", "02_arcade_machine_V5.glb", "02_arcade_machine_V6.glb"]
