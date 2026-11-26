@@ -49,6 +49,8 @@ func _draw() -> void:
 		# A body hidden by a closed room's cover (or by anything else) must not leave its bar floating over the fog.
 		if body == null or not body.is_inside_tree() or not body.is_visible_in_tree():
 			continue
+		if float(body.get("_emerge_left")) > 0.0: # still climbing out of its hole: the bar would float over the floor
+			continue
 		if hero != null and not same_room(hero_rooms, rooms_at(get_tree(), body.global_position)):
 			continue
 		if covered_by_other_room(get_tree(), body.global_position, hero_rooms):
