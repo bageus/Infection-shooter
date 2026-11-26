@@ -67,7 +67,7 @@ func _mount(path: String) -> void:
 	await _settle(2)
 	for prop in props:
 		_expect(prop.freeze, path + ": remains attached while the partition is intact")
-	var weapon := "UZI" if "wall_TV" in path or "wall_clock" in path or "capboard" in path else "GRENADE"
+	var weapon := "AK" if "wall_TV" in path or "wall_clock" in path or "capboard" in path else "GRENADE"
 	for shot in 12:
 		if bool(partition.get("_broken")):
 			break

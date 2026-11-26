@@ -24,7 +24,7 @@ func _categories_and_balance() -> void:
 	cabinet.hit(20.0, "SHOTGUN", false, false, false, false)
 	_check(is_equal_approx(cabinet.health, 140.0), "Shotgun object multiplier remains 0.75")
 	cabinet.hit(20.0, "UZI", false, false, false, false)
-	_check(is_equal_approx(cabinet.health, 140.0 - 20.0 * 28.0 / 15.0), "Uzi hits props as hard as AK rounds (28 vs 15)")
+	_check(is_equal_approx(cabinet.health, 140.0), "Uzi cannot damage a large prop, like a pistol")
 
 
 func _variant_progression() -> void:
@@ -45,7 +45,7 @@ func _grenade_and_pending() -> void:
 	state.configure("03_cabinet.glb", 3, true)
 	state.hit(200.0, "GRENADE", false, false, false, false)
 	var exhausted := state.health
-	_check(state.hit(200.0, "UZI", false, false, false, false) == STATE.HitAction.PUSH and state.health == exhausted, "Hits arriving before deferred transition do not consume another stage")
+	_check(state.hit(200.0, "AK", false, false, false, false) == STATE.HitAction.PUSH and state.health == exhausted, "Hits arriving before deferred transition do not consume another stage")
 	_check(state.full_break and state.complete_transition() == STATE.Transition.BREAK and state.variant_index == -1, "Grenade bypasses variants when fragments exist")
 	var variant_only := STATE.new()
 	variant_only.configure("05_monitor.glb", 1, false)
