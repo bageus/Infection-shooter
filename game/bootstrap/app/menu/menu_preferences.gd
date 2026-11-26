@@ -21,7 +21,7 @@ const DEFAULTS := {"window_mode": 0, "resolution": "1280x720", "language": "ru",
 	"enemies_ignore_player": false, "enemies_no_damage": false, "enemy_difficulty": 1,
 	"walk_speed_multiplier": 1.0, "walk_animation_multiplier": 1.0,
 	"enemy_move_speed_multiplier": 1.0, "enemy_animation_multiplier": 1.0,
-	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music_volume": 1.0, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "lighting": true, "game_lights_only": false, "blood_style": 0, "blood_level": 1, "blood_green": false, "effects_quality": 2, "destruction_quality": 1,
+	"volume": 0.4, "effects_volume": 1.0, "music_volume": 1.0, "menu_music_volume": 1.0, "occlusion_mode": 0, "test_mutagen": false, "infinite_antidotes": false, "active_medkits": false, "lighting": true, "game_lights_only": false, "blood_style": 0, "blood_level": 1, "blood_green": false, "effects_quality": 2, "destruction_quality": 1,
 	"bullet_impact_smoke": true, "enemy_health_bars": false, "show_fps": true, "show_enemy_count": true, "sunlight": true, "shadows": false, "shadow_quality": 1, "few_lamps": false, "render_scale": 100, "mesh_lod": true, "keep_corpses": true, "hide_unseen_props": true, "floor_hints": true, "camera_shake": true, "post_fx": true, "dust": true}
 var values: Dictionary = DEFAULTS.duplicate()
 
@@ -167,6 +167,8 @@ func apply_to_game(tree: SceneTree, display_user_action: bool = false) -> void:
 		scene.call("set_enemy_gameplay_modes", bool(values.enemies_ignore_player), bool(values.enemies_no_damage))
 	if scene != null and scene.has_method("set_test_mutagen_enabled"):
 		scene.call("set_test_mutagen_enabled", bool(values.test_mutagen))
+	if scene != null:
+		scene.set_meta(&"active_medkits", bool(values.active_medkits)) # read by the run's medkit button
 	if scene != null and scene.has_method("set_infinite_antidotes_enabled"):
 		scene.call("set_infinite_antidotes_enabled", bool(values.infinite_antidotes))
 	if scene != null and scene.has_method("set_post_fx_enabled"):

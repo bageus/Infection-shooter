@@ -54,6 +54,14 @@ func _action(action: String) -> void:
 	if action == "start":
 		CHECKPOINT.clear()
 	match action:
+		"tutorial":
+			_loading = true
+			var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
+			add_child(loader)
+			loader.completed.connect(func(_success: bool) -> void: _loading = false)
+			loader.set("completion_music", completion_music)
+			completion_music = null
+			loader.start_map(CHECKPOINT.map_file(menu.TUTORIAL_MAP), menu.TUTORIAL_MAP, {})
 		"start", "restart":
 			var arena := _next_arena()
 			if arena == "!":
