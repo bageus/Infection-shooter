@@ -231,6 +231,8 @@ func _test_paint_can_flies_off() -> void:
 	for frame in 60:
 		await physics_frame
 	_expect(can.global_position.distance_to(start) > 0.3, "An AK hit throws a paint can off the floor (%.2f m)." % can.global_position.distance_to(start))
+	_expect(not BULLET_PUSH.flies_off(MODELS + "15/15_paint_bucket.glb", "PISTOL") and BULLET_PUSH.flies_off(MODELS + "15/15_paint_bucket.glb", "SHOTGUN"), "A pistol round does not throw a paint can, a shotgun does.")
+	_expect(BULLET_PUSH.flies_off(MODELS + "15/15_barrel_blue.glb", "AK") and not BULLET_PUSH.flies_off(MODELS + "15/15_barrel_blue.glb", "PISTOL"), "A barrel flies from a rifle hit, not from a pistol.")
 	stage.queue_free()
 	await process_frame
 
