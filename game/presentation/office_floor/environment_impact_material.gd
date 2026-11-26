@@ -7,6 +7,8 @@ const PIPE_MODELS := ["_duct_", "_pipe_", "_barrel_"]
 # Bullet-resistant tank glass: shots ring like armor.
 const ARMORED_GLASS_MODELS := ["Containment_Tank_"]
 const DOOR_MODELS := ["metal_door", "elevator"]
+# Barrels are steel drums: shots ring like pipes, but a barrel that lands or bumps rings like metal.
+const STEEL_KNOCK_MODELS := ["_barrel_"]
 
 
 static func resolve(model_path: String, projectile_material: String) -> String:
@@ -18,4 +20,11 @@ static func resolve(model_path: String, projectile_material: String) -> String:
 		if model in model_path: return "metal"
 	for model in DOOR_MODELS:
 		if model in model_path: return "door"
+	return projectile_material
+
+
+## Material of a knock or landing (fall sound), which can differ from the impact sound of a shot.
+static func knock(model_path: String, projectile_material: String) -> String:
+	for model in STEEL_KNOCK_MODELS:
+		if model in model_path: return "metal"
 	return projectile_material

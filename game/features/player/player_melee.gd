@@ -167,6 +167,9 @@ func _kick_object(hit: Node3D, forward: Vector3) -> void:
 
 static func _hit_event(body: Node3D) -> StringName:
 	var material := str(body.call("get_projectile_material", -1)) if body.has_method("get_projectile_material") else "wood"
+	# Pipes and barrels ring like steel when kicked, whatever their bullet cost says.
+	if body.has_method("get_impact_sound_material") and str(body.call("get_impact_sound_material", -1)) == "pipe":
+		material = "metal"
 	return HIT_EVENTS.get(material, &"hit_wood")
 
 
