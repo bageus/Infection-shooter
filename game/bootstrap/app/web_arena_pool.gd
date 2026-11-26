@@ -16,7 +16,7 @@ static func names(dirs: Array = DIRS) -> Array[String]:
 			continue
 		for file in DirAccess.get_files_at(folder):
 			var map_name := file.get_basename()
-			if file.get_extension() == "json" and map_name.begins_with(PREFIX) and map_name not in found:
+			if file.get_extension() == "json" and map_name.to_lower().begins_with(PREFIX) and map_name not in found:
 				found.append(map_name)
 	found.sort()
 	return found
@@ -32,4 +32,4 @@ static func remaining(dirs: Array = DIRS) -> Array[String]:
 
 
 static func is_arena(map_name: String) -> bool:
-	return map_name.begins_with(PREFIX)
+	return map_name.to_lower().begins_with(PREFIX)

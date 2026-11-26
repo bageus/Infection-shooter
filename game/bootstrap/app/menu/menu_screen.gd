@@ -32,6 +32,7 @@ var checkpoint_mission := false
 ## Store page offered on the defeat and victory screens; empty on platforms without the promo.
 var steam_url := ""
 ## Web arena shop beside the main menu buttons; only on a platform with the endless mode.
+const TUTORIAL_MAP := "tutorial_lvl"
 var shop_enabled := false
 var shop: Control
 var _click_player: AudioStreamPlayer
@@ -145,6 +146,8 @@ func _build_content() -> void:
 	match screen_kind:
 		"main":
 			_add_button("new", "briefing")
+			if shop_enabled and FileAccess.file_exists(CHECKPOINT.map_file(TUTORIAL_MAP)):
+				_add_button("tutorialButton", "tutorial")
 			var can_continue := not CHECKPOINT.resume_map().is_empty()
 			var disabled_continue := _add_button("continue", "continue", not can_continue)
 			disabled_continue.tooltip_text = "" if can_continue else text("noSave")
