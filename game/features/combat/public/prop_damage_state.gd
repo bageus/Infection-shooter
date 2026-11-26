@@ -2,7 +2,7 @@ extends RefCounted
 ## Runtime damage rules for one prop. No scenes, rendering or physics dependencies.
 const BALANCE := preload("res://game/features/combat/public/projectile_balance.gd")
 enum HitAction { NONE, SHUDDER, SCATTER, TRANSITION, CHIP_FACADE, DETACH, PUSH, COLLAPSE }
-## Broken 04 crates: one shotgun blast, two or three AK/M4/UZI shots, one minigun or sniper shot; pistols do nothing.
+## Broken 04 crates: one shotgun blast, two or three AK/M4 shots, one minigun or sniper shot; pistols and Uzis do nothing.
 const BROKEN_CRATE_HEALTH := 70.0
 enum Transition { NONE, VARIANT, BREAK }
 const BIG_CRATES := ["04_crate_wood_large.glb"]

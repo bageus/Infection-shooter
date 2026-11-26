@@ -58,9 +58,9 @@ func _test_cardboard(stage: Node3D) -> void:
 	await _clear(box, setup[1])
 
 
-## Shots that break a broken 04 crate: a pistol never does, the others need the listed number of hits.
+## Shots that break a broken 04 crate: a pistol and an Uzi never do, the others need the listed number of hits.
 func _test_broken_crate_shots(stage: Node3D) -> void:
-	var cases := [["PISTOL", 19.0, 0], ["UZI", 15.0, 3], ["AK", 28.0, 3], ["M4", 23.0, 4], ["MINIGUN", 20.0, 4], ["SNIPER RIFLE", 105.0, 1], ["SHOTGUN", 32.0, 3]]
+	var cases := [["PISTOL", 19.0, 0], ["UZI", 15.0, 0], ["AK", 28.0, 3], ["M4", 23.0, 4], ["MINIGUN", 20.0, 4], ["SNIPER RIFLE", 105.0, 1], ["SHOTGUN", 32.0, 3]]
 	for model in [MODELS + "04/04_crate_small_broken.glb", MODELS + "04/04_crate_large_broken.glb"]:
 		for case in cases:
 			var needed: int = case[2]
