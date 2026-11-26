@@ -5,6 +5,7 @@ const CAMPAIGN := preload("res://game/bootstrap/app/campaign_config.gd")
 const PLATFORM := preload("res://game/infrastructure/platform/public/platform.gd")
 const MAP_MODE := preload("res://game/bootstrap/app/planning_map_mode.gd")
 const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.gd")
+const SHOP := preload("res://game/bootstrap/app/web_shop.gd")
 const WALLET := preload("res://game/bootstrap/app/web_wallet.gd")
 const LEVEL_CAPTION := preload("res://game/bootstrap/app/level_caption.gd")
 
@@ -25,6 +26,7 @@ static func sync(main: Node, director: Node, level: String) -> void:
 		enemies.child_entered_tree.connect(_watch_kills.bind(main))
 		for enemy in enemies.get_children():
 			_watch_kills(enemy, main)
+		main.tree_exiting.connect(end_run.bind(main))
 		main.tree_exiting.connect(WALLET.flush)
 
 
@@ -69,6 +71,54 @@ static func _show_coins(main: Node) -> void:
 	label.text = main.tr("webCoins").replace("%d", str(WALLET.coins()))
 
 
+## A new web run starts from the shop stock: bought and rented weapons (two free slots), ammo that fits,
+## antidotes and armor. Stock that does not fit stays in the shop.
+static func begin_run(main: Node) -> void:
+	if not MAP_MODE.is_web() or main.has_meta(&"web_run"):
+		return
+	var player: Node = main.get("player")
+	var profile := WALLET.profile()
+	for id in SHOP.take_run_weapons(profile):
+		player.call("pickup_weapon", SHOP.WEAPON_INDEX[id])
+	var held: Array = player.call("carried_weapon_indices")
+	var taken := {}
+	for pack: String in SHOP.AMMO_WEAPONS:
+		var stock := int(profile["ammo"].get(pack, 0))
+		for index: int in SHOP.AMMO_WEAPONS[pack]:
+			if stock > 0 and index in held:
+				var gun: Node = player.get("weapons")[index]
+				var baseline := int(gun.call("carried_ammo"))
+				var added := int(gun.call("add_reserve_ammo", stock))
+				profile["ammo"][pack] = stock - added
+				taken[pack] = [index, baseline, added]
+				break
+	var syringes := mini(int(profile["supplies"].get("antidote", 0)), int(player.get("max_antidotes")) - int(player.get("antidotes")))
+	if syringes > 0 and bool(player.call("add_antidote", syringes)):
+		profile["supplies"]["antidote"] -= syringes
+	while int(profile["supplies"].get("armor", 0)) > 0 and float(player.get("armor")) < float(player.get("max_armor")):
+		player.set("armor", minf(float(player.get("armor")) + SHOP.ARMOR_PLATE, float(player.get("max_armor"))))
+		profile["supplies"]["armor"] -= 1
+	WALLET.mark_dirty()
+	main.set_meta(&"web_run", taken)
+
+
+## Ammo taken into the run and not spent goes back to the shop stock; safe to call twice.
+static func end_run(main: Node) -> void:
+	if not main.has_meta(&"web_run"):
+		return
+	var taken: Dictionary = main.get_meta(&"web_run")
+	main.remove_meta(&"web_run")
+	var player: Node = main.get("player")
+	if not is_instance_valid(player):
+		return
+	var profile := WALLET.profile()
+	for pack: String in taken:
+		var gun: Node = player.get("weapons")[taken[pack][0]]
+		var left := clampi(int(gun.call("carried_ammo")) - int(taken[pack][1]), 0, int(taken[pack][2]))
+		profile["ammo"][pack] = int(profile["ammo"].get(pack, 0)) + left
+	WALLET.mark_dirty()
+
+
 static func _announce(wave: int, is_boss: bool, main: Node) -> void:
 	var caption: CanvasLayer = LEVEL_CAPTION.new()
 	caption.caption = main.tr("webWaveHorde") if is_boss else main.tr("webWave").replace("%d", str(wave))
@@ -78,6 +128,7 @@ static func _announce(wave: int, is_boss: bool, main: Node) -> void:
 
 
 static func _complete(main: Node) -> void:
+	end_run(main)
 	WALLET.flush()
 	if not bool(main.get("_ended")) and not bool(main.get("_dying")):
 		main.call("_end_run", "MISSION COMPLETE")

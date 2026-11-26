@@ -264,6 +264,8 @@ func _enter_level(planner: Node) -> void:
 	pending.set("current_level", _level_name)
 	if not _carry.is_empty():
 		pending.call("apply_carry", _carry)
+	else:
+		preload("res://game/bootstrap/app/web_arena.gd").begin_run(pending) # a web map starts from the shop stock
 	if pending.has_node("LevelEntries"):
 		pending.get_node("LevelEntries").call("note_entry")
 	if _arrival.has("x"):

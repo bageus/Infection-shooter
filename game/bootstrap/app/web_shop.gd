@@ -5,6 +5,7 @@ extends RefCounted
 ## An "ad" offer is free after a rewarded ad (the caller shows the ad, then calls claim_ad / rent_with_ad).
 
 const SUPPLY_CAP := 5
+const ARMOR_PLATE := 50.0
 ## Weapon ids in the order of the player's weapon array (the grenade launcher is not sold).
 const WEAPON_INDEX := {"pistol": 0, "uzi": 1, "shotgun": 2, "ak": 4, "m16": 5, "sniper": 6, "minigun": 7}
 ## Ammo pack per weapon: amount, coin price (0 = only for an ad), ad = also free for an ad. The AK and M16 share a pack.
@@ -123,11 +124,16 @@ static func _pay(profile: Dictionary, price: int, ad_offer: bool, by_ad: bool) -
 	return ""
 
 
-## Weapons a new run starts with besides the pistol (owned and rented), and the rentals are used up.
-static func take_run_weapons(profile: Dictionary) -> Array[String]:
+## Ammo pack -> weapon indices (player order) that draw from it; the first one held gets the ammo.
+const AMMO_WEAPONS := {"pistol": [0], "uzi": [1], "shotgun": [2], "rifle": [4, 5], "sniper": [6], "minigun": [7]}
+
+
+## Weapons a new run starts with besides the pistol, at most `slots` (rented first, they last one run;
+## a rental that finds no free slot stays rented).
+static func take_run_weapons(profile: Dictionary, slots: int = 2) -> Array[String]:
 	var weapons: Array[String] = []
-	for id: String in profile["owned"] + profile["rented"]:
-		if id not in weapons:
+	for id: String in profile["rented"] + profile["owned"]:
+		if weapons.size() < slots and id not in weapons:
 			weapons.append(id)
-	profile["rented"] = []
+	profile["rented"] = profile["rented"].filter(func(id: String) -> bool: return id not in weapons)
 	return weapons

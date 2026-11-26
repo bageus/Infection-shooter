@@ -30,7 +30,11 @@ func _init() -> void:
 	_check(SHOP.rent_weapon(p, "ak").is_empty() and p["coins"] == 320 and "ak" in p["rented"], "rent an AK for 480")
 	_check(SHOP.rent_weapon(p, "minigun") == "no_offer" and SHOP.rent_weapon(p, "minigun", true).is_empty(), "the minigun is rented only for an ad")
 	var weapons := SHOP.take_run_weapons(p)
-	_check(weapons == ["shotgun", "ak", "minigun"] and p["rented"].is_empty() and p["owned"] == ["shotgun"], "a run takes owned and rented weapons, rentals are used up")
+	_check(weapons == ["ak", "minigun"] and p["rented"].is_empty() and p["owned"] == ["shotgun"], "a run takes rented weapons first, two slots, rentals are used up")
+	p["rented"].append("sniper")
+	_check(SHOP.take_run_weapons(p) == ["sniper", "shotgun"], "owned weapons fill the free slots")
+	p["rented"] = ["m16", "ak", "sniper"]
+	_check(SHOP.take_run_weapons(p) == ["m16", "ak"] and p["rented"] == ["sniper"], "a rental without a free slot stays rented")
 	_check(SHOP.buy_ammo(p, "nope") == "unknown", "unknown packs are refused")
 	var loaded := SHOP.sanitize({"coins": -5, "ammo": {"pistol": 7, "bogus": 1}, "supplies": {"health": 99}, "owned": ["ak", "ak", "rpg"], "rented": "x"})
 	_check(loaded["coins"] == 0 and loaded["ammo"] == {"pistol": 7} and loaded["supplies"]["health"] == 5 and loaded["owned"] == ["ak"] and loaded["rented"].is_empty(), "a save file is repaired")
