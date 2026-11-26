@@ -320,3 +320,4 @@ game/features/spawning/tests/run_web_arena_tests.gd
 game/bootstrap/app/tests/run_web_wallet_tests.gd
 game/bootstrap/app/tests/run_web_kill_coins_tests.gd
 game/bootstrap/app/tests/run_web_shop_tests.gd
+game/bootstrap/app/tests/run_web_shop_panel_tests.gd
