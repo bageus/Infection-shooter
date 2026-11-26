@@ -316,3 +316,4 @@ game/bootstrap/app/tests/run_render_cost_probe_tests.gd
 game/bootstrap/app/tests/run_map_mode_tests.gd
 game/features/spawning/tests/run_web_waves_tests.gd
 game/bootstrap/app/tests/run_web_spawn_editor_tests.gd
+game/features/spawning/tests/run_web_arena_tests.gd
