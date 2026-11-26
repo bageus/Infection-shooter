@@ -323,7 +323,7 @@ func _check_notice_badge(dialog: Control, tabs: TabContainer) -> void:
 	for page_index in 4:
 		_check(not tabs.get_child(page_index).is_ancestor_of(badge), "Notice badge stays outside scrolling tab contents")
 	tabs.current_tab = 0
-	_check(badge.visible, "General shows its own notice")
+	_check(not badge.visible, "General has no ! badge")
 	tabs.current_tab = 3
 	_check(not badge.visible, "Audio without a notice hides the badge")
 	tabs.current_tab = 1
