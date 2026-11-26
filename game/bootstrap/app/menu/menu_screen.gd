@@ -87,9 +87,10 @@ func text(key: String) -> String:
 	return str(translations[preferences.values.language].get(key, key))
 
 
-func show_screen(kind: String, reason: String = "") -> void:
+func show_screen(kind: String, reason: String = "", checkpoint := false) -> void:
 	screen_kind = kind
 	reason_key = reason
+	checkpoint_mission = checkpoint
 	preferences.load_settings()
 	refresh()
 	show()
