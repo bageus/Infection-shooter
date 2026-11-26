@@ -36,6 +36,8 @@ func _action(action: String) -> void:
 	if action.begins_with("plan_map:"):
 		_plan_map(action.trim_prefix("plan_map:"))
 		return
+	if action == "start":
+		CHECKPOINT.clear()
 	match action:
 		"start", "restart":
 			_loading = true

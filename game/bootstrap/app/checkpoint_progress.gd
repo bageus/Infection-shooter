@@ -8,6 +8,11 @@ const PATH := "user://checkpoint_progress.json"
 const VERSION := 1
 
 
+## Forgets the saved checkpoint; a new operation starts from the first map.
+static func clear() -> void:
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(PATH))
+
+
 static func passed_map() -> String:
 	if not FileAccess.file_exists(PATH):
 		return ""

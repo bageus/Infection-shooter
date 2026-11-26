@@ -207,7 +207,7 @@ func _emphasize(button: Button) -> void:
 func _restart_key() -> String:
 	if OS.has_feature("web"):
 		return "restart"
-	return "restartCheckpoint" if screen_kind == "pause" or checkpoint_mission else "restart"
+	return "restartCheckpoint" if checkpoint_mission else "restart"
 
 
 func _note_key() -> String:
