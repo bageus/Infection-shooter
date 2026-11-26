@@ -355,6 +355,7 @@ func _choose_enhanced_ammo() -> void:
 
 func _end_run(reason: String) -> void:
 	_ended = true
+	preload("res://game/bootstrap/app/web_arena.gd").end_run(self)
 	var kind := "complete" if reason == "MISSION COMPLETE" else "failed"
 	var reason_key: String = {"MUTATION OVERTOOK YOU": "failedMutation",
 		"YOU FELL OUTSIDE THE FLOOR": "failedFall", "YOU DIED": "failedHealth"}.get(reason, "")
