@@ -2,6 +2,7 @@ extends Control
 
 const CHECKPOINT := preload("res://game/bootstrap/app/checkpoint_progress.gd")
 const LEVEL_CHAIN := preload("res://game/bootstrap/app/level_chain.gd")
+const ARENAS := preload("res://game/bootstrap/app/web_arena_pool.gd")
 const SFX := preload("res://game/core/audio/public/sound_events.gd")
 
 @onready var menu = $Menu
@@ -30,6 +31,20 @@ func _plan_map(path: String) -> void:
 	loader.start_map(path, path.get_file().get_basename(), {})
 
 
+## Web platform: a random arena not beaten yet; "" when it has no arenas (the chain plays), "!" when all are beaten.
+func _next_arena() -> String:
+	if not menu.shop_enabled:
+		return ""
+	if ARENAS.names().is_empty():
+		return ""
+	var left := ARENAS.remaining()
+	if left.is_empty():
+		menu.reason_key = "webAllPassed"
+		menu.refresh()
+		return "!"
+	return left[randi() % left.size()]
+
+
 func _action(action: String) -> void:
 	if _loading:
 		return
@@ -40,12 +55,18 @@ func _action(action: String) -> void:
 		CHECKPOINT.clear()
 	match action:
 		"start", "restart":
+			var arena := _next_arena()
+			if arena == "!":
+				return
 			_loading = true
 			var loader := preload("res://game/bootstrap/app/menu/mission_loader.gd").new()
 			add_child(loader)
 			loader.completed.connect(func(_success: bool) -> void: _loading = false)
 			loader.set("completion_music", completion_music)
 			completion_music = null
+			if not arena.is_empty():
+				loader.start_map(CHECKPOINT.map_file(arena), arena, {})
+				return
 			# A level chain in the constructor starts a new game from its first map.
 			var chain: RefCounted = LEVEL_CHAIN.new()
 			chain.load_file()

@@ -7,6 +7,7 @@ const MAP_MODE := preload("res://game/bootstrap/app/planning_map_mode.gd")
 const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.gd")
 const SHOP := preload("res://game/bootstrap/app/web_shop.gd")
 const WALLET := preload("res://game/bootstrap/app/web_wallet.gd")
+const POOL := preload("res://game/bootstrap/app/web_arena_pool.gd")
 const LEVEL_CAPTION := preload("res://game/bootstrap/app/level_caption.gd")
 
 
@@ -129,6 +130,8 @@ static func _announce(wave: int, is_boss: bool, main: Node) -> void:
 
 static func _complete(main: Node) -> void:
 	end_run(main)
+	if MAP_MODE.is_web() and POOL.is_arena(str(main.get("current_level"))):
+		WALLET.mark_beaten(str(main.get("current_level")))
 	WALLET.flush()
 	if not bool(main.get("_ended")) and not bool(main.get("_dying")):
 		main.call("_end_run", "MISSION COMPLETE")
