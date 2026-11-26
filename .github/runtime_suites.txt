@@ -323,4 +323,5 @@ game/bootstrap/app/tests/run_web_shop_tests.gd
 game/bootstrap/app/tests/run_web_shop_panel_tests.gd
 game/bootstrap/app/tests/run_web_run_stock_tests.gd
 game/bootstrap/app/tests/run_web_arena_pool_tests.gd
+game/bootstrap/app/tests/run_web_wave_loot_tests.gd
 game/bootstrap/app/tests/run_web_medkits_tests.gd

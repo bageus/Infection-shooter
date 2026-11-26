@@ -8,6 +8,7 @@ const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.
 const SHOP := preload("res://game/bootstrap/app/web_shop.gd")
 const WALLET := preload("res://game/bootstrap/app/web_wallet.gd")
 const POOL := preload("res://game/bootstrap/app/web_arena_pool.gd")
+const WAVE_LOOT := preload("res://game/bootstrap/app/web_wave_loot.gd")
 const MEDKITS := preload("res://game/bootstrap/app/web_medkits.gd")
 const LEVEL_CAPTION := preload("res://game/bootstrap/app/level_caption.gd")
 
@@ -38,8 +39,9 @@ static func _watch_kills(enemy: Node, main: Node) -> void:
 		enemy.connect("blood_death", _paid.bind(enemy, main))
 
 
-static func _paid(_position: Vector3, _excluded: Array, _death_id: int, enemy: Node, main: Node) -> void:
+static func _paid(position: Vector3, _excluded: Array, _death_id: int, enemy: Node, main: Node) -> void:
 	if MAP_MODE.is_web():
+		main.set_meta(&"web_last_kill", position)
 		WALLET.add_kill(_kind(enemy.scene_file_path))
 		_show_coins(main)
 
@@ -124,6 +126,9 @@ static func end_run(main: Node) -> void:
 
 
 static func _announce(wave: int, is_boss: bool, main: Node) -> void:
+	if main.has_meta(&"web_last_kill"): # the previous wave just ended: its last enemy may drop loot
+		WAVE_LOOT.drop(main, main.get_meta(&"web_last_kill"))
+		main.remove_meta(&"web_last_kill")
 	var caption: CanvasLayer = LEVEL_CAPTION.new()
 	caption.caption = main.tr("webWaveHorde") if is_boss else main.tr("webWave").replace("%d", str(wave))
 	caption.seconds = 2.0
