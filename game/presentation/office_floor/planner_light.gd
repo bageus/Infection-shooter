@@ -173,6 +173,10 @@ func get_budget_lit() -> bool:
 	return _budget_lit
 
 
+func get_budget_fade() -> float:
+	return _budget_fade
+
+
 ## Spot lights of a long fixture copy the cone/color of the authored main light.
 func sync_sub_lights() -> void:
 	if light == null:

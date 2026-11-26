@@ -48,6 +48,10 @@ func is_wanted() -> bool:
 	return _wanted
 
 
+func get_budget_fade() -> float:
+	return _fade
+
+
 func set_local_lighting_enabled(enabled: bool) -> void:
 	_local_enabled = enabled
 	_apply()
