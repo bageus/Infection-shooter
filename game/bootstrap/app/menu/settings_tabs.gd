@@ -171,7 +171,6 @@ func _tuning_sliders() -> void:
 	dialog.call("_slider", "walkAnimationSpeed", "walk_animation_multiplier", 0.5, 2.0, 0.05, "%.2f×")
 	dialog.call("_slider", "enemyMoveSpeed", "enemy_move_speed_multiplier", 0.5, 2.0, 0.05, "%.2f×")
 	dialog.call("_slider", "enemyAnimationSpeed", "enemy_animation_multiplier", 0.5, 2.0, 0.05, "%.2f×")
-	notices.set_notice(0, dialog.view.text("testMutagenHint") + "\n\n" + dialog.view.text("walkTuningHint"))
 
 
 func _enemy_modes() -> void:

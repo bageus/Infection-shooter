@@ -45,11 +45,13 @@ static func apply(visual_root: Node3D, skin: StringName) -> MeshInstance3D:
 	return costume
 
 
-## Swaps in the rig mesh without the tie triangles (tools/build_no_tie_meshes.gd).
+## Swaps in the rig mesh without the tie triangles (tools/build_no_tie_meshes.gd). A file that fails
+## to load keeps the body with its tie instead of an invisible body.
 static func _remove_tie(body: MeshInstance3D, enemy: String) -> void:
 	var path := "%s%s_rig_mesh_no_tie.res" % [DIR, enemy]
-	if ResourceLoader.exists(path):
-		body.mesh = load(path)
+	var mesh := load(path) as Mesh if ResourceLoader.exists(path) else null
+	if mesh != null:
+		body.mesh = mesh
 		body.set_meta(&"no_tie", true)
 
 
