@@ -49,6 +49,8 @@ func _run() -> void:
 	await _test_kicks()
 	await _test_shots_move_items()
 	await _test_server_rack_stays_put()
+	await _test_paint_can_flies_off()
+	_test_barrel_knock_is_metal()
 	print("Prop weight tests: %d failure(s)." % failures)
 	quit(failures)
 
@@ -216,6 +218,31 @@ func _test_server_rack_stays_put() -> void:
 	_expect(rack.global_position.distance_to(start) < 0.01, "Rifle shots do not move a server rack (%.3f m)." % rack.global_position.distance_to(start))
 	stage.queue_free()
 	await process_frame
+
+
+## A paint can (2.8 kg) is too light for a nudge to show: a rifle hit throws it off the floor, like a bottle.
+func _test_paint_can_flies_off() -> void:
+	var stage := _stage()
+	var can := _prop(stage, MODELS + "15/15_paint_bucket.glb", Vector3(0, 0.6, 0))
+	for frame in 30:
+		await physics_frame
+	var start := can.global_position
+	can.call("take_projectile_hit", 6.0, can.global_position + Vector3(0, 0.2, 0), Vector3.UP, Vector3(1, 0, 0), "AK")
+	for frame in 60:
+		await physics_frame
+	_expect(can.global_position.distance_to(start) > 0.3, "An AK hit throws a paint can off the floor (%.2f m)." % can.global_position.distance_to(start))
+	stage.queue_free()
+	await process_frame
+
+
+## A barrel that lands or bumps rings like metal, although bullets still cost it as wood.
+func _test_barrel_knock_is_metal() -> void:
+	var stage := _stage()
+	var barrel := _prop(stage, MODELS + "15/15_barrel_blue.glb", Vector3(0, 3, 0))
+	var watcher := barrel.get_node_or_null("ImpactSound")
+	_expect(watcher != null and watcher.get("event") == &"fall_metal", "A barrel's landing sound is metal, not wood.")
+	_expect(str(barrel.call("get_projectile_material", -1)) == "wood", "A barrel still costs bullets as wood.")
+	stage.queue_free()
 
 
 func _expect(condition: bool, message: String) -> void:

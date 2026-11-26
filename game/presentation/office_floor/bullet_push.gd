@@ -19,6 +19,8 @@ static func speed(weapon: String, weight_kg: float) -> float:
 
 
 const BUCKET_MOP := preload("res://game/presentation/office_floor/bucket_mop_split.gd")
+## Light items that a shot throws off instead of nudging: a bottle, and a paint can (2.8 kg nudges stop after ~1 cm on the floor).
+const FLY_OFF_ITEMS := ["09_plastic_water_bottle", "15_paint_bucket"]
 
 
 ## A shot that hits the prop: a bucket with a mop splits off its mop first, then the item is pushed.
@@ -27,6 +29,12 @@ static func shot(body: RigidBody3D, weight_kg: float, weapon: String, direction:
 	apply(body, weight_kg, weapon, direction, hit_position)
 	if light_item:
 		fly_off(body, direction)
+
+
+static func flies_off(model_path: String) -> bool:
+	for item in FLY_OFF_ITEMS:
+		if item in model_path: return true
+	return false
 
 
 ## A plastic bottle is light: a hit throws it off its shelf instead of nudging it (apply caps at MAX_SPEED).
