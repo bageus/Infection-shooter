@@ -172,11 +172,7 @@ func _ready() -> void:
 
 ## The platform's endless level plays endless rounds instead of the authored triggers.
 func _sync_endless() -> void:
-	if not is_instance_valid(wave_director):
-		return
-	var campaign := CAMPAIGN.new()
-	campaign.load_file()
-	wave_director.set("endless", not current_level.is_empty() and current_level == campaign.endless_level(PLATFORM.detect_id()))
+	preload("res://game/bootstrap/app/web_arena.gd").sync(self, wave_director, current_level)
 
 
 func refresh_control_labels() -> void:

@@ -7,6 +7,7 @@ extends Node
 const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.gd")
 const WAVE_QUEUE := preload("res://game/features/spawning/domain/wave_queue.gd")
 const ENDLESS := preload("res://game/features/spawning/domain/endless_waves.gd")
+const WEB := preload("res://game/features/spawning/domain/web_waves.gd")
 const BODY_WARMUP := preload("res://game/features/infected/public/body_mesh_warmup.gd")
 ## Meta on a placed infected: Array of link keys (spawn_config.link_key) whose queue its death can start.
 const TRIGGER_META := &"spawn_triggers"
@@ -19,13 +20,24 @@ const WAVE_STEP := 0.1
 const TRIGGER_POLL := 0.25
 ## Infected instantiated per physics frame; a big batch is spread over several frames.
 const SPAWNS_PER_FRAME := 3
+## Seconds between a cleared wave and the next one (the "Wave N" caption shows meanwhile).
+const WAVE_PAUSE := 3.0
 
 signal round_started(round_number: int)
+## Web arena: a wave is about to start (after WAVE_PAUSE), and the Horde wave was cleared.
+signal wave_announced(wave: int, is_boss: bool)
+signal arena_cleared
 
 var max_alive := WAVE_QUEUE.MAX_ALIVE
 ## Endless mode: authored triggers are ignored and all queues replay, harder each round.
 var endless := false
 var round_number := 0
+## Web arena (coins, endless waves, Horde boss): wave 0 is the placed infected, then holes play wave after wave.
+## `web_source` is asked on arm() whether the loaded map is a web map.
+var web := false
+var web_source := Callable()
+var web_wave := -1
+var wave_pause := WAVE_PAUSE
 ## Builds each enemy kind's body geometry (one kind per frame) when the director arms, and holds the waves until
 ## that is done, so the first enemy of a kind does not freeze a fight for about 0.8 s. The mission turns it on.
 var warm_enemy_meshes := false
@@ -48,6 +60,10 @@ var _elapsed := 0.0
 var _backlog: Array[Dictionary] = []
 var _wave_clock := 0.0
 var _poll_clock := 0.0
+var _holes := {}
+var _web_timer := -1.0
+var _web_boss_wave := 0
+var _web_done := false
 
 
 func configure(enemies_root: Node3D, player: Node3D) -> void:
@@ -59,6 +75,8 @@ func configure(enemies_root: Node3D, player: Node3D) -> void:
 func arm() -> void:
 	disarm()
 	_armed = true
+	if web_source.is_valid():
+		web = bool(web_source.call())
 	for node in get_tree().get_nodes_in_group(POINT_GROUP):
 		if not node is Node3D or node.is_queued_for_deletion() or node.has_meta(&"planning_preview"):
 			continue
@@ -69,6 +87,9 @@ func arm() -> void:
 		node.remove_meta(SPENT_META)
 		var config: Dictionary = node.call("get_spawn_config")
 		_loot[id] = config["loot"]
+		_holes[id] = config
+		if WEB.is_boss(config) and (_web_boss_wave == 0 or int(config["web"]["boss_wave"]) < _web_boss_wave):
+			_web_boss_wave = int(config["web"]["boss_wave"])
 		var queues: Array = config["queues"]
 		for index in queues.size():
 			var key := SPAWN_CONFIG.link_key(id, index)
@@ -92,6 +113,12 @@ func _queue_warmup() -> void:
 	for key: String in _queues:
 		for entry: Dictionary in _queues[key]["config"]["enemies"]:
 			paths[SPAWN_CONFIG.scene_path(str(entry["enemy"]))] = true
+	for id: String in _holes:
+		var web_config: Dictionary = _holes[id].get("web", {})
+		if web:
+			paths[SPAWN_CONFIG.scene_path("horde" if WEB.is_boss(_holes[id]) else "hunger")] = true
+		for unlock: Dictionary in web_config.get("unlocks", []):
+			paths[SPAWN_CONFIG.scene_path(str(unlock["enemy"]))] = true
 	for enemy in _enemies_root.get_children():
 		if enemy.has_method("watch_target") and not enemy.scene_file_path.is_empty():
 			paths[enemy.scene_file_path] = true
@@ -120,6 +147,7 @@ func disarm() -> void:
 			if is_instance_valid(enemy):
 				enemy.queue_free()
 	_points.clear()
+	_holes.clear()
 	_loot.clear()
 	_linked.clear()
 	_spawned.clear()
@@ -132,6 +160,10 @@ func disarm() -> void:
 	_backlog.clear()
 	_armed = false
 	round_number = 0
+	web_wave = -1
+	_web_timer = -1.0
+	_web_boss_wave = 0
+	_web_done = false
 	_wave_clock = 0.0
 	_poll_clock = 0.0
 	_elapsed = 0.0
@@ -158,6 +190,8 @@ func _physics_process(delta: float) -> void:
 		arm()
 	if endless:
 		_advance_rounds()
+	elif web:
+		_advance_web(delta)
 	_poll_clock += delta
 	if _poll_clock >= TRIGGER_POLL:
 		_poll_clock = 0.0
@@ -172,7 +206,7 @@ func _physics_process(delta: float) -> void:
 
 ## Starts every queue whose linked infected have died.
 func check_triggers() -> void:
-	if endless:
+	if endless or web:
 		return
 	for key: String in _queues:
 		var queue: Dictionary = _queues[key]
@@ -190,7 +224,7 @@ func check_triggers() -> void:
 
 ## Marks each spawn point whose queues have all fired, with no wave still pending for it and no living infected of its own.
 func _mark_spent() -> void:
-	if endless:
+	if endless or web:
 		return
 	for id: String in _points:
 		var point: Node3D = _points[id]
@@ -213,7 +247,7 @@ func _mark_spent() -> void:
 
 ## Starts every timed queue whose predecessor started long enough ago.
 func _check_delays() -> void:
-	if endless:
+	if endless or web:
 		return
 	for key: String in _queues:
 		var queue: Dictionary = _queues[key]
@@ -243,6 +277,44 @@ func _advance_rounds() -> void:
 		_queue.activate(key, scaled)
 		_fired_at[key] = _elapsed
 	round_started.emit(round_number)
+
+
+## Web arena: wave 0 is every placed infected dead; each later wave starts WAVE_PAUSE after the last
+## one is cleared. Clearing the Horde wave ends the arena.
+func _advance_web(delta: float) -> void:
+	if _web_done or _queues.is_empty() or not _warm_paths.is_empty():
+		return
+	if _web_timer >= 0.0:
+		_web_timer -= delta
+		if _web_timer < 0.0:
+			_start_wave(web_wave + 1)
+		return
+	web_wave = maxi(web_wave, 0)
+	if pending_total() > 0 or alive_count() > 0:
+		return
+	if _web_boss_wave > 0 and web_wave >= _web_boss_wave:
+		_web_done = true
+		arena_cleared.emit()
+		return
+	_web_timer = wave_pause
+	wave_announced.emit(web_wave + 1, web_wave + 1 == _web_boss_wave)
+
+
+func _start_wave(wave: int) -> void:
+	web_wave = wave
+	round_number = wave
+	_web_timer = -1.0
+	_queue.clear()
+	for key: String in _queues:
+		var queue: Dictionary = _queues[key]
+		var hole: Dictionary = _holes[queue["point"]]
+		if int(queue["index"]) != 0 or not WEB.spawns_in_wave(hole, wave):
+			continue
+		var scaled := WEB.queue_for_wave(hole, wave)
+		queue["config"] = scaled # _spawn reads the wave's health and damage from here
+		if _queue.activate(key, scaled):
+			_fired_at[key] = _elapsed
+	round_started.emit(wave)
 
 
 func _fire(key: String) -> void:

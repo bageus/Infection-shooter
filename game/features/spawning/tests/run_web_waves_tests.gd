@@ -21,7 +21,7 @@ func _count(queue: Dictionary, kind: String) -> int:
 
 func _init() -> void:
 	var old := CONFIG.sanitize({"queues": [{"enemies": [{"enemy": "hunger", "count": 10}]}]})
-	_check(not old.has("web") and not WEB.spawns_in_wave(old, 1), "a campaign hole has no web settings")
+	_check(not old.has("web") and WEB.spawns_in_wave(old, 1), "a hole without web settings plays as a wave hole")
 	var web := CONFIG.default_web()
 	web["unlocks"] = [{"enemy": "revenant", "from_wave": 3, "share": 5, "step": 1, "cap": 4}]
 	var hole := CONFIG.sanitize({"queues": [{"enemies": [{"enemy": "hunger", "count": 10}], "health": 100, "damage": 100}], "web": web})

@@ -6,12 +6,12 @@ const SPAWN_CONFIG := preload("res://game/features/spawning/public/spawn_config.
 
 
 static func is_boss(config: Dictionary) -> bool:
-	return config.has("web") and str(config["web"]["role"]) == "boss"
+	return str(config.get("web", {}).get("role", "wave")) == "boss"
 
 
 ## True when the hole spawns something in `wave` (1 is the first wave). Boss holes only in their wave.
 static func spawns_in_wave(config: Dictionary, wave: int) -> bool:
-	if not config.has("web") or wave < 1:
+	if wave < 1:
 		return false
 	return wave == int(config["web"]["boss_wave"]) if is_boss(config) else true
 
