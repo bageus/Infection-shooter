@@ -154,8 +154,8 @@ func _test_infected() -> void:
 	stage.add_child(target)
 	target.global_position = enemy.global_position + Vector3(0, 0, -1.0)
 	enemy.call("set_target", target)
-	await physics_frame
-	await physics_frame
+	for _i in 3: # a near enemy re-plans (and starts its attack) every 2nd tick
+		await physics_frame
 	_expect(_voices(&"attack_swing") >= 1, "An attack starts with a swing.")
 	await create_timer(0.6).timeout
 	_expect(_voices(&"attack_hit") + _voices(&"attack_bite") >= 1, "A landed blow is heard.")
