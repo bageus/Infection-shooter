@@ -61,7 +61,7 @@ static func run(e, delta: float) -> void:
 	e._obstacle_cooldown = maxf(0.0, e._obstacle_cooldown - step)
 
 	var near: bool = distance_sq < e.full_simulation_distance * e.full_simulation_distance
-	var ai_divisor: int = 1 if near else 4
+	var ai_divisor: int = 2 if near else 4 # near enemies re-plan every 2nd tick: the cached velocity is one tick old at most
 	if lazy or physics_frame % ai_divisor == e._ai_tick_offset % ai_divisor:
 		e._cached_desired = e._desired_velocity_from_offset(target_offset)
 
@@ -92,5 +92,5 @@ static func run(e, delta: float) -> void:
 	t = PhysicsCost.lap(&"capsule_push_chair", t)
 	e._breaker.track_progress(e, delta if near else delta * 2.0, not e._route.direct_clear())
 	t = PhysicsCost.lap(&"capsule_track", t)
-	if near or physics_frame % 4 == e._ai_tick_offset:
+	if physics_frame % (2 if near else 4) == e._ai_tick_offset % (2 if near else 4):
 		e._try_break_blocking_props(); PhysicsCost.add(&"capsule_props", Time.get_ticks_usec() - t_mark)

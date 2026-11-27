@@ -226,8 +226,8 @@ func _test_large_enemy_limps_and_fights_one_armed(stage: Node3D) -> void:
 	enemy.set_physics_process(true)
 	enemy.call("set_target", target)
 	var player := enemy.get_node("AnimationDriver").get("animation_player") as AnimationPlayer
-	await physics_frame
-	await physics_frame
+	for _i in 3: # a near enemy re-plans (and starts its attack) every 2nd tick
+		await physics_frame
 	_expect(player.current_animation.begins_with("AttackLeft"), "The one-armed Titan swings its left arm.")
 	await create_timer(player.get_animation(player.current_animation).length * 0.5 + 0.1).timeout
 	_expect(target.damage_taken > 0.0, "Its one-armed blow still lands.")
